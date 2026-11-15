@@ -169,6 +169,7 @@ label{display:block;font-size:12px;color:var(--mut);margin:8px 0 3px}
 .g2{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start}.tf{margin-bottom:12px}.tf label{font-size:12.5px;color:var(--mut);margin:0 0 3px;display:block}.g2i{display:grid;grid-template-columns:3fr 1fr;gap:14px}.g3i{display:grid;grid-template-columns:1fr 2fr 1fr;gap:14px}
 .rq{color:#e0245e}.ck2{display:flex;gap:8px;align-items:center;margin:6px 0;color:var(--b600);font-size:14px;cursor:pointer}.ck2 input{width:auto}.fis{margin:4px 0}.cd{display:inline-block;width:52px;font-weight:600}
 @media(max-width:900px){.g2,.cg{grid-template-columns:1fr}}
+.tt .big{white-space:nowrap;gap:10px}.tt .big span{font-size:16px}.tt .big b{flex:none}
 </style>
 </head>
 <body>
@@ -225,34 +226,35 @@ function derive(docs,prods){
   const J=[],K={},W={},st={},A=[],Am={},meses={},Nm={},IP=[];
   const ln=(d,c,de,ha,ter,ven)=>{if(Math.round(de)||Math.round(ha))J.push({d,fecha:d.fecha,c,de:Math.round(de),ha:Math.round(ha),ter,ven})};
   const caja=m=>m==='banco'?'111005':'110505';
+  const cj=(d,de,ha)=>{const tot=de||ha,P=d.pagos&&d.pagos.length?d.pagos:null;if(!P){ln(d,caja(d.medio),de,ha);return}let acc=0;P.forEach((x,i)=>{const v=i===P.length-1?tot-acc:Math.round(+x.v||0);acc+=v;if(de)ln(d,caja(x.m),v,0);else ln(d,caja(x.m),0,v)})};
   const S0=p=>st[p]||(st[p]={q:0,c:0});
   sorted.forEach(d=>{
     if(d.tipo==='FC'){const c=docCalc(d),rt=retAmt(d,c.base);
       d.items.forEach(it=>{const s=S0(it.p);const b=it.qty*it.precio*(1-(it.desc||0)/100);const nq=s.q+it.qty;s.c=nq>0?(s.q*s.c+b)/nq:it.precio;s.q=nq;(K[it.p]=K[it.p]||[]).push({fecha:d.fecha,doc:d.num,det:'Compra',ent:it.qty,sal:0,cu:b/it.qty,q:s.q,v:s.q*s.c})});
       ln(d,'143505',c.base,0);ln(d,'240802',c.iva,0);if(rt)ln(d,d.rete.c,0,rt);
-      if(d.pago==='credito')ln(d,'220505',0,c.total-rt,d.ter,addDays(d.fecha,d.dias||30));else ln(d,caja(d.medio),0,c.total-rt)}
+      if(d.pago==='credito')ln(d,'220505',0,c.total-rt,d.ter,addDays(d.fecha,d.dias||30));else cj(d,0,c.total-rt)}
     else if(d.tipo==='FV'){const c=docCalc(d),rt=retAmt(d,c.base);let cost=0;
       d.items.forEach(it=>{if(SV[it.p])return;const s=S0(it.p);const cu=s.c;cost+=it.qty*cu;s.q-=it.qty;if(s.q<0)W[d.id]='Stock negativo de '+(names[it.p]||it.p);(K[it.p]=K[it.p]||[]).push({fecha:d.fecha,doc:d.num,det:'Venta',ent:0,sal:it.qty,cu,q:s.q,v:s.q*s.c})});
-      if(d.pago==='credito')ln(d,'130505',c.total-rt,0,d.ter,addDays(d.fecha,d.dias||30));else ln(d,caja(d.medio),c.total-rt,0);
+      if(d.pago==='credito')ln(d,'130505',c.total-rt,0,d.ter,addDays(d.fecha,d.dias||30));else cj(d,c.total-rt,0);
       if(rt)ln(d,'135515',rt,0);
       ln(d,'413595',0,c.base-bsv(d));ln(d,'415505',0,bsv(d));ln(d,'240801',0,c.iva);cost=Math.round(cost);ln(d,'613595',cost,0);ln(d,'143505',0,cost)}
     else if(d.tipo==='NV'){const c=docCalc(d);let cost=0;
       d.items.forEach(it=>{if(SV[it.p])return;const s=S0(it.p);const cu=s.c;cost+=it.qty*cu;s.q+=it.qty;(K[it.p]=K[it.p]||[]).push({fecha:d.fecha,doc:d.num,det:'Devolución en venta',ent:it.qty,sal:0,cu,q:s.q,v:s.q*s.c})});
       ln(d,'413595',c.base-bsv(d),0);ln(d,'415505',bsv(d),0);ln(d,'240801',c.iva,0);
-      if(d.pago==='credito')ln(d,'130505',0,c.total,d.ter);else ln(d,caja(d.medio),0,c.total);
+      if(d.pago==='credito')ln(d,'130505',0,c.total,d.ter);else cj(d,0,c.total);
       cost=Math.round(cost);ln(d,'143505',cost,0);ln(d,'613595',0,cost)}
     else if(d.tipo==='NP'){const c=docCalc(d);
       d.items.forEach(it=>{const s=S0(it.p);const b=it.qty*it.precio*(1-(it.desc||0)/100);const v=s.q*s.c-b;s.q-=it.qty;if(s.q>0)s.c=v/s.q;if(s.q<0)W[d.id]='Stock negativo de '+(names[it.p]||it.p);(K[it.p]=K[it.p]||[]).push({fecha:d.fecha,doc:d.num,det:'Devolución en compra',ent:0,sal:it.qty,cu:it.precio,q:s.q,v:s.q*s.c})});
-      if(d.pago==='credito')ln(d,'220505',c.total,0,d.ter);else ln(d,caja(d.medio),c.total,0);
+      if(d.pago==='credito')ln(d,'220505',c.total,0,d.ter);else cj(d,c.total,0);
       ln(d,'143505',0,c.base);ln(d,'240802',0,c.iva)}
     else if(d.tipo==='GA'){const c=docCalc(d),rt=retAmt(d,c.base);
       ln(d,d.cuenta,c.base,0);ln(d,'240802',c.iva,0);if(rt)ln(d,d.rete.c,0,rt);
-      if(d.pago==='credito')ln(d,'220505',0,c.total-rt,d.ter,addDays(d.fecha,d.dias||30));else ln(d,caja(d.medio),0,c.total-rt)}
+      if(d.pago==='credito')ln(d,'220505',0,c.total-rt,d.ter,addDays(d.fecha,d.dias||30));else cj(d,0,c.total-rt)}
     else if(d.tipo==='NO'){const c=nomCalc(d.emps,d.exon);Nm[d.id]={neto:c.tot.neto,fecha:d.fecha,pagada:false};c.lines.forEach(x=>ln(d,x[0],x[1],x[2]))}
-    else if(d.tipo==='PN'){const n=Nm[d.nom];if(!n)W[d.id]='La liquidación de nómina no existe o su fecha es posterior';else if(n.pagada)W[d.id]='Esta nómina ya fue pagada';else{n.pagada=true;ln(d,'250505',n.neto,0);ln(d,caja(d.medio),0,n.neto)}}
+    else if(d.tipo==='PN'){const n=Nm[d.nom];if(!n)W[d.id]='La liquidación de nómina no existe o su fecha es posterior';else if(n.pagada)W[d.id]='Esta nómina ya fue pagada';else{n.pagada=true;ln(d,'250505',n.neto,0);cj(d,0,n.neto)}}
     else if(d.tipo==='AF'){const c=docCalc(d),k=ACT[d.cat]||ACT.of;
       const a={id:d.id,doc:d.num,nombre:d.nombre,cat:d.cat,cuenta:d.cuenta,ac:k.ac,g:k.g,fecha:d.fecha,costo:c.base,vida:d.vida,resid:d.resid||0,acum:0,n:0,baja:null};A.push(a);Am[d.id]=a;
-      ln(d,d.cuenta,c.base,0);ln(d,'240802',c.iva,0);if(d.pago==='credito')ln(d,'220505',0,c.total,d.ter,addDays(d.fecha,d.dias||30));else ln(d,caja(d.medio),0,c.total)}
+      ln(d,d.cuenta,c.base,0);ln(d,'240802',c.iva,0);if(d.pago==='credito')ln(d,'220505',0,c.total,d.ter,addDays(d.fecha,d.dias||30));else cj(d,0,c.total)}
     else if(d.tipo==='DP'){const mk=d.fecha.slice(0,7);
       if(meses[mk])W[d.id]='Ya existe una depreciación de este mes';
       else{meses[mk]=1;let n=0;const g={};
@@ -262,19 +264,19 @@ function derive(docs,prods){
     else if(d.tipo==='BA'){const a=Am[d.activo];
       if(!a)W[d.id]='El activo ya no existe';else if(a.baja)W[d.id]='Este activo ya fue dado de baja';else if(a.fecha>d.fecha)W[d.id]='La fecha es anterior a la compra del activo';
       else{const v=Math.round(+d.valor||0),lib=a.costo-a.acum,df=v-lib;
-        ln(d,a.ac,a.acum,0);if(v)ln(d,caja(d.medio),v,0);if(df<0)ln(d,'531005',-df,0);ln(d,a.cuenta,0,a.costo);if(df>0)ln(d,'424505',0,df);a.baja=d.id;a.bajaF=d.fecha;a.venta=v}}
-    else if(d.tipo==='ND'||d.tipo==='DG'){const c=docCalc(d);if(d.tipo==='DG'&&d.pago!=='credito')ln(d,caja(d.medio),c.total,0);else ln(d,'130505',c.total,0,d.ter,addDays(d.fecha,d.dias||30));ln(d,d.cuenta,0,c.base);ln(d,'240801',0,c.iva)}
+        ln(d,a.ac,a.acum,0);if(v)cj(d,v,0);if(df<0)ln(d,'531005',-df,0);ln(d,a.cuenta,0,a.costo);if(df>0)ln(d,'424505',0,df);a.baja=d.id;a.bajaF=d.fecha;a.venta=v}}
+    else if(d.tipo==='ND'||d.tipo==='DG'){const c=docCalc(d);if(d.tipo==='DG'&&d.pago!=='credito')cj(d,c.total,0);else ln(d,'130505',c.total,0,d.ter,addDays(d.fecha,d.dias||30));ln(d,d.cuenta,0,c.base);ln(d,'240801',0,c.iva)}
     else if(d.tipo==='DI'){
       if(!d.desde||!d.hasta||d.desde>d.hasta)W[d.id]='Revisa las fechas del período';
       else if(IP.some(q=>d.desde<=q.h&&d.hasta>=q.d))W[d.id]='Ese período ya fue declarado (se cruza con otra declaración)';
       else{const ge=J.filter(x=>x.c==='240801'&&x.fecha>=d.desde&&x.fecha<=d.hasta).reduce((a,x)=>a+x.ha-x.de,0),dd=J.filter(x=>x.c==='240802'&&x.fecha>=d.desde&&x.fecha<=d.hasta).reduce((a,x)=>a+x.de-x.ha,0);
         if(!ge&&!dd)W[d.id]='No hay IVA en ese período';
-        else{IP.push({d:d.desde,h:d.hasta});ln(d,'240801',ge,0);ln(d,'240802',0,dd);if(ge>dd)ln(d,caja(d.medio),0,ge-dd);else if(dd>ge)ln(d,'135517',dd-ge,0)}}}
+        else{IP.push({d:d.desde,h:d.hasta});ln(d,'240801',ge,0);ln(d,'240802',0,dd);if(ge>dd)cj(d,0,ge-dd);else if(dd>ge)ln(d,'135517',dd-ge,0)}}}
     else if(d.tipo==='CI'){const ac={};J.forEach(x=>{if('456'.includes(x.c[0]))ac[x.c]=(ac[x.c]||0)+x.de-x.ha});const ks=Object.keys(ac).filter(k=>ac[k]).sort();
       if(!ks.length)W[d.id]='No hay cuentas de resultado por cerrar';
       else{let net=0;ks.forEach(k=>{const v=ac[k];if(v>0)ln(d,k,0,v);else ln(d,k,-v,0);net+=v});if(net<0)ln(d,'360505',0,-net);else if(net>0)ln(d,'361005',net,0)}}
-    else if(d.tipo==='RC'){ln(d,caja(d.medio),d.valor,0);ln(d,'130505',0,d.valor,d.ter)}
-    else if(d.tipo==='CE'){ln(d,'220505',d.valor,0,d.ter);ln(d,caja(d.medio),0,d.valor)}
+    else if(d.tipo==='RC'){cj(d,d.valor,0);ln(d,'130505',0,d.valor,d.ter)}
+    else if(d.tipo==='CE'){ln(d,'220505',d.valor,0,d.ter);cj(d,0,d.valor)}
     else if(d.tipo==='CC'){d.lines.forEach(l=>ln(d,l.c,+l.d||0,+l.h||0,l.ter))}
   });
   return{J,K,W,st,sorted,A};
@@ -399,10 +401,27 @@ function vInicio(){
   return tabs+`<div class="wcard"><h3>Te damos la bienvenida${U?', '+esc(U.name.split(' ')[0]):''}, ¿Qué deseas hacer?</h3><div class="wgrid">${acc.map(x=>`<div onclick="quick('${x[0]}')"><i>${x[2]}</i><span>${x[1]}</span></div>`).join('')}</div></div>`}
 
 /* ---------- Terceros ---------- */
-function vEmpleados(){
-  return `<p><button class="btn" onclick="formEmpl()">+ Nuevo empleado</button></p><div class="tw"><table><tr><th>Documento</th><th>Nombre</th><th>Cargo</th><th class="r">Salario mensual</th><th class="r">Aux. de transporte</th><th>Ingreso</th><th></th></tr>${S.empleados.map(e=>`<tr><td>CC ${esc(e.doc)}</td><td>${esc(e.nombre)}</td><td>${esc(e.cargo)}</td><td class="r">${fmt(e.salario)}</td><td class="r">${e.salario<=2*NOM.smmlv?fmt(NOM.aux):'No aplica'}</td><td>${esc(e.ingreso||'')}</td><td class="r"><button class="btn del sm" onclick="delEmpl('${e.id}')">Eliminar</button></td></tr>`).join('')||'<tr><td colspan=7>Sin empleados</td></tr>'}</table></div><p class="emp">Referencia 2026: salario mínimo ${fmt(NOM.smmlv)} · auxilio de transporte ${fmt(NOM.aux)}.</p>`}
-function formEmpl(){modal(`<h3>Nuevo empleado</h3><div class="row"><div><label>Cédula</label><input id="e1"></div><div><label>Nombre completo</label><input id="e2"></div></div><div class="row"><div><label>Cargo</label><input id="e3"></div><div><label>Salario mensual</label><input id="e4" type="number" min="0"></div><div><label>Fecha de ingreso</label><input id="e5" type="date"></div></div><p><button class="btn" onclick="saveEmpl()">Guardar</button> <button class="btn sec" onclick="closeM()">Cancelar</button></p>`)}
-function saveEmpl(){const n=$('#e2').value.trim(),s=+$('#e4').value;if(!n||!$('#e1').value.trim())return toast('Completa cédula y nombre');if(!(s>=NOM.smmlv))return toast('El salario no puede ser menor al mínimo ('+fmt(NOM.smmlv)+')');S.empleados.push({id:'E'+(++S.seq),doc:$('#e1').value.trim(),nombre:n,cargo:$('#e3').value.trim(),salario:s,ingreso:$('#e5').value});save();closeM();render()}
+let EF=null,empQ='';
+function vEmpleados(){const q=empQ.toLowerCase(),L=S.empleados.filter(e=>!q||(e.nombre+' '+e.doc+' '+(e.cargo||'')).toLowerCase().includes(q));
+  return `<div class="toolbar"><div class="sbox"><span>⌕</span><input type="text" value="${esc(empQ)}" placeholder="Buscar por nombre, identificación o cargo (Enter)" onkeydown="if(event.key==='Enter'){empQ=this.value;render()}"></div><span class="sp"></span><button class="btn" onclick="formEmpl()">Crear empleado</button></div>
+  <div class="tw" style="border-radius:0;border-top:0"><table class="lst"><tr><th>Identificación</th><th>Nombre</th><th>Cargo</th><th>Contrato</th><th class="r">Salario mensual</th><th class="r">Aux. de transporte</th><th>Ingreso</th><th>Acciones</th></tr>${L.map(e=>`<tr><td>${esc(e.tid||'CC')} ${esc(e.doc)}</td><td><a class="lnk" onclick="formEmpl('${e.id}')">${esc(e.nombre)}</a></td><td>${esc(e.cargo)}</td><td>${esc(e.contrato||'Término indefinido')}</td><td class="r">${fmt(e.salario)}</td><td class="r">${e.salario<=2*NOM.smmlv?fmt(NOM.aux):'No aplica'}</td><td>${esc(e.ingreso||'')}</td><td><button class="btn sec sm" onclick="formEmpl('${e.id}')">Editar</button> <button class="btn del sm" onclick="delEmpl('${e.id}')">Eliminar</button></td></tr>`).join('')||'<tr><td colspan=8>Aún no has creado empleados. Pulsa «Crear empleado».</td></tr>'}</table></div><div class="lstf"><span>${L.length} empleado(s)</span><span class="emp">Referencia 2026: salario mínimo ${fmt(NOM.smmlv)} · auxilio de transporte ${fmt(NOM.aux)}</span></div>`}
+function formEmpl(id){const e=id?S.empleados.find(x=>x.id===id):null;
+  EF=e?{id:e.id,tid:e.tid||'CC',doc:e.doc,nom:e.nom||e.nombre,ape:e.ape||'',cargo:e.cargo||'',salario:e.salario,ingreso:e.ingreso||'',contrato:e.contrato||'Término indefinido',ciudad:e.ciudad||'',dir:e.dir||'',tel:e.tel||'',correo:e.correo||'',arl:e.arl||'I'}:{id:null,tid:'CC',doc:'',nom:'',ape:'',cargo:'',salario:'',ingreso:'',contrato:'Término indefinido',ciudad:'',dir:'',tel:'',correo:'',arl:'I'};
+  const T=EF,inp=(k,l,req,ty)=>`<div class="tf"><label>${req?'<b class="rq">*</b> ':''}${l}</label><input ${ty?`type="${ty}"`:''} value="${esc(T[k])}" onchange="EF.${k}=this.value"></div>`;
+  $('#ov').className='full';$('#ov').innerHTML=`<div class="fh"><b>${T.id?'Edición':'Creación'} de empleado</b><span class="x2" onclick="closeM()">✕</span></div><div class="fbody">
+  <p>Todos los campos marcados con <b class="rq">*</b> son obligatorios para la creación del empleado.</p>
+  <div class="g2"><div class="fcard"><h4><b class="rq">*</b> Datos básicos</h4>
+   <div class="tf"><label><b class="rq">*</b> Tipo de identificación</label><select onchange="EF.tid=this.value">${['CC','CE','PA'].map(k=>`<option value="${k}" ${T.tid===k?'selected':''}>${TIDS[k]}</option>`).join('')}</select></div>
+   ${inp('doc','Identificación',1)}${inp('nom','Nombres',1)}${inp('ape','Apellidos',1)}${inp('ciudad','Ciudad')}${inp('dir','Dirección')}${inp('tel','Teléfono')}${inp('correo','Correo electrónico')}</div>
+  <div class="fcard"><h4><b class="rq">*</b> Datos laborales</h4>
+   ${inp('cargo','Cargo')}${inp('salario','Salario mensual',1,'number')}${inp('ingreso','Fecha de ingreso',0,'date')}
+   <div class="tf"><label>Tipo de contrato</label><select onchange="EF.contrato=this.value">${['Término indefinido','Término fijo','Obra o labor','Aprendizaje'].map(k=>`<option ${T.contrato===k?'selected':''}>${k}</option>`).join('')}</select></div>
+   <div class="tf"><label>Nivel de riesgo ARL</label><select onchange="EF.arl=this.value">${['I','II','III','IV','V'].map(k=>`<option ${T.arl===k?'selected':''}>${k}</option>`).join('')}</select></div>
+   <div class="note">El salario mínimo 2026 es ${fmt(NOM.smmlv)}. Si el salario es de hasta 2 mínimos, el sistema liquida el auxilio de transporte.</div></div></div></div>
+  <div class="ffoot"><a class="lnk" onclick="closeM()">Cancelar</a><button class="btn" onclick="saveEmpl()">Guardar</button></div>`}
+function saveEmpl(){const T=EF,nombre=(T.nom+' '+T.ape).trim(),sal=+T.salario;if(!String(T.doc).trim()||!T.nom.trim())return toast('Completa identificación y nombres');if(!(sal>=NOM.smmlv))return toast('El salario no puede ser menor al mínimo ('+fmt(NOM.smmlv)+')');
+  const o={tid:T.tid,doc:String(T.doc).trim(),nom:T.nom,ape:T.ape,nombre,cargo:T.cargo.trim(),salario:sal,ingreso:T.ingreso,contrato:T.contrato,ciudad:T.ciudad,dir:T.dir,tel:T.tel,correo:T.correo,arl:T.arl};
+  if(T.id)Object.assign(S.empleados.find(x=>x.id===T.id),o);else S.empleados.push({id:'E'+(++S.seq),...o});save();closeM();render();toast('Empleado guardado')}
 function delEmpl(id){S.empleados=S.empleados.filter(e=>e.id!==id);save();render()}
 let TF=null,terQ='';
 const TIDS={CC:'Cédula de ciudadanía',NIT:'NIT',CE:'Cédula de extranjería',PA:'Pasaporte',TI:'Tarjeta de identidad',RC:'Registro civil'};
@@ -550,7 +569,7 @@ const RETC={'':'Sin retención','236540|2.5':'Compras 2,5%','236525|4':'Servicio
 const RETV={'':'Sin retención','2.5':'2,5%','3.5':'3,5%','4':'4%'};
 const NOP=['CZ','RM'],TCLI=['FV','RC','NV','CZ','ND','DG','RM'],TITEM=['FV','FC','NV','NP','CZ','RM'],TCR=['FV','FC','GA','NV','NP','AF'];
 function parseRet(t,key){if(!key)return null;if(t==='FV')return{c:'135515',pct:+key};const p=key.split('|');return{c:p[0],pct:+p[1]}}
-function newDoc(t){F={tipo:t,fecha:today(),ter:'',pago:(t==='NV'||t==='NP')?'credito':'contado',medio:'caja',numProv:'',valor:'',concepto:'',dias:30,ret:'',cuenta:'512010',base:'',ivaPct:0,cz:null,cat:'of',nombre:'',vida:120,resid:0,activo:'',exon:true,nom:'',lines:t==='CC'?[{c:'',d:0,h:0},{c:'',d:0,h:0}]:[{p:'',qty:1,precio:0,desc:0}],desde:'',hasta:'',vp:false};
+function newDoc(t){F={tipo:t,fecha:today(),ter:'',pago:(t==='NV'||t==='NP')?'credito':'contado',medio:'caja',pagos:[],numProv:'',valor:'',concepto:'',dias:30,ret:'',cuenta:'512010',base:'',ivaPct:0,cz:null,cat:'of',nombre:'',vida:120,resid:0,activo:'',exon:true,nom:'',lines:t==='CC'?[{c:'',d:0,h:0},{c:'',d:0,h:0}]:[{p:'',qty:1,precio:0,desc:0}],desde:'',hasta:'',vp:false};
   if(t==='ND')F.cuenta='413595';
   if(t==='DG')F.cuenta='429595';
   if(t==='DI'||t==='CI'){const fs=S.docs.filter(x=>x.tipo!=='DI'&&x.tipo!=='CI').map(x=>x.fecha).sort();const a=fs[0]||today(),b=fs[fs.length-1]||today();F.desde=a.slice(0,7)+'-01';F.hasta=new Date(Date.UTC(+b.slice(0,4),+b.slice(5,7),0)).toISOString().slice(0,10);F.fecha=F.hasta}
@@ -559,7 +578,16 @@ function convertQ(id){const q=S.docs.find(x=>x.id===id);F={tipo:'FV',fecha:today
 const MASC=['RC','CE','CC','GA','PN','CI'];
 const nuevo=t=>(MASC.includes(t)?'Nuevo ':'Nueva ')+TIPOS[t].toLowerCase();
 function vpBox(tmp){return `<details class="gd" style="margin-top:14px" ${F.vp?'open':''} ontoggle="F.vp=this.open"><summary>Ver contabilización (el asiento que se generará)</summary>${prevHTML(tmp)}</details>`}
-function fpSet(v){if(v==='credito')F.pago='credito';else{F.pago='contado';F.medio=v}formDoc()}
+const MED={caja:'Efectivo - Caja general',banco:'Transferencia - Bancos'};
+function fpSplit(){const m=F.medio||'caja';F.pagos=[{m,v:Math.round(F._tot||0)},{m:m==='caja'?'banco':'caja',v:0}];formDoc()}
+function fpMulti(total){F._tot=total;const P=F.pagos&&F.pagos.length?F.pagos:null;
+  if(!P)return `<p><a class="al" onclick="fpSplit()">+Agregar otra forma de pago</a></p><div class="tfp">Total formas de pago: <b>${total.toFixed(2)}</b> <span class="ck">✓</span></div>`;
+  const sm=P.reduce((a,x)=>a+(+x.v||0),0),ok=Math.round(sm)===Math.round(total);
+  return `<table class="mtab sit"><tr><th>Forma de pago</th><th style="width:150px">Valor</th><th style="width:34px"></th></tr>${P.map((x,i)=>`<tr><td><select onchange="F.pagos[${i}].m=this.value">${Object.keys(MED).map(k=>`<option value="${k}" ${x.m===k?'selected':''}>${MED[k]}</option>`).join('')}</select></td><td><input type="number" min="0" value="${x.v}" onchange="F.pagos[${i}].v=+this.value;formDoc()"></td><td><span class="trash" onclick="F.pagos.splice(${i},1);if(F.pagos.length<2)F.pagos=[];formDoc()">✕</span></td></tr>`).join('')}</table><p><a class="al" onclick="F.pagos.push({m:'caja',v:0});formDoc()">+Agregar otra forma de pago</a> &nbsp; <a class="al" onclick="F.pagos=[];formDoc()">Usar un solo medio</a></p><div class="tfp">Total formas de pago: <b>${sm.toFixed(2)}</b> ${ok?'<span class="ck">✓</span>':'<span style="color:#b3261e;font-size:14px">Debe sumar '+total.toFixed(2)+'</span>'}</div>`}
+function fpGen(){const t=F.tipo;if(!['GA','DG'].includes(t)||F.pago==='credito')return'';let tot;
+  if(t==='GA'){const dd={tipo:'GA',base:F.base,ivaPct:F.ivaPct,rete:parseRet('GA',F.ret)},c=docCalc(dd);tot=c.total-retAmt(dd,c.base)}else tot=docCalc({tipo:'DG',base:F.base,ivaPct:F.ivaPct}).total;
+  return `<h4 class="sh">Formas de pago</h4>`+fpMulti(tot)}
+function fpSet(v){F.pagos=[];if(v==='credito')F.pago='credito';else{F.pago='contado';F.medio=v}formDoc()}
 function formItems(){
   const t=F.tipo,tt=TCLI.includes(t)?'cliente':'proveedor',its=F.lines.map(l=>({...l,iva:l.p?prod(l.p).iva:0,desc:+l.desc||0})),dd={tipo:t,items:its,rete:parseRet(t,F.ret)},c=docCalc(dd),rt=retAmt(dd,c.base),bruto=its.reduce((a,l)=>a+l.qty*l.precio,0),neto=c.total-rt;
   const tmp={id:'tmp',seq:1e9,tipo:t,fecha:F.fecha,ter:F.ter,items:its.filter(l=>l.p&&l.qty>0),pago:F.pago,medio:F.medio,dias:F.dias,rete:parseRet(t,F.ret),numProv:F.numProv};
@@ -580,14 +608,34 @@ function formItems(){
   <div class="tw" style="margin-top:14px;border:0"><table class="mtab sit"><tr><th style="width:30px">#</th><th style="width:250px">Producto</th><th>Descripción</th><th style="width:80px">Cant</th><th style="width:120px">Valor Unitario</th><th style="width:70px">% Desc.</th><th style="width:95px">Impuesto Cargo</th><th style="width:105px">Impuesto Retención</th><th class="r" style="width:120px">Valor Total</th><th style="width:34px"></th></tr>${F.lines.map((l,i)=>`<tr><td>${i+1}</td><td><select onchange="setP(${i},this.value)"><option value="">Buscar...</option>${prodsFor(t).map(p=>`<option value="${p.id}" ${l.p===p.id?'selected':''}>${esc(p.cod)} · ${esc(p.nombre)}</option>`).join('')}</select></td><td class="gr">${l.p?esc(prod(l.p).nombre):''}</td><td><input type="number" min="1" value="${l.qty}" onchange="F.lines[${i}].qty=+this.value;formDoc()"></td><td><input type="number" min="0" value="${l.precio}" onchange="F.lines[${i}].precio=+this.value;formDoc()"></td><td><input type="number" min="0" max="100" value="${l.desc||0}" onchange="F.lines[${i}].desc=+this.value;formDoc()"></td><td>${l.p?'IVA '+prod(l.p).iva+'%':''}</td><td>${rt&&l.p?(dd.rete.pct+'%'):''}</td><td class="r">${(l.qty*l.precio*(1-(+l.desc||0)/100)).toFixed(2)}</td><td><span class="trash" title="Quitar línea" onclick="F.lines.splice(${i},1);if(!F.lines.length)F.lines.push({p:'',qty:1,precio:0,desc:0});formDoc()">✕</span></td></tr>`).join('')}</table></div>
   <p><a class="al" onclick="F.lines.push({p:'',qty:1,precio:0,desc:0});formDoc()">+Agregar otra línea</a></p>
   <div class="bt"><div>
-   ${!NOP.includes(t)?`<h4 class="sh">${dev?'Forma de devolución':'Formas de pago'}</h4><div class="fpr"><select onchange="fpSet(this.value)">${Object.keys(lab).map(k=>`<option value="${k}" ${fp===k?'selected':''}>${lab[k]}</option>`).join('')}</select><input readonly value="${neto.toFixed(2)}"></div>${F.pago==='credito'&&!dev?`<div class="fr" style="margin-top:8px"><label>Plazo (días)</label><input type="number" min="0" style="max-width:120px" value="${F.dias}" onchange="F.dias=+this.value"></div>`:''}<div class="tfp">Total formas de pagos: <b>${neto.toFixed(2)}</b> <span class="ck">✓</span></div>`:'<div class="note">Una cotización no tiene forma de pago ni genera asiento.</div>'}
+   ${!NOP.includes(t)?`<h4 class="sh">${dev?'Forma de devolución':'Formas de pago'}</h4>${(!dev&&F.pago!=='credito'&&F.pagos&&F.pagos.length)?'':`<div class="fpr"><select onchange="fpSet(this.value)">${Object.keys(lab).map(k=>`<option value="${k}" ${fp===k?'selected':''}>${lab[k]}</option>`).join('')}</select><input readonly value="${neto.toFixed(2)}"></div>`}${F.pago==='credito'&&!dev?`<div class="fr" style="margin-top:8px"><label>Plazo (días)</label><input type="number" min="0" style="max-width:120px" value="${F.dias}" onchange="F.dias=+this.value"></div>`:''}${(F.pago==='credito'||dev)?`<div class="tfp">Total formas de pagos: <b>${neto.toFixed(2)}</b> <span class="ck">✓</span></div>`:fpMulti(neto)}`:'<div class="note">Una cotización no tiene forma de pago ni genera asiento.</div>'}
    <h4 class="sh">${t==='CZ'?'Condiciones Comerciales':'Observaciones'}</h4><textarea rows="3" placeholder="${t==='CZ'?'Validez de la oferta, forma de pago, tiempo de entrega...':'Aquí puedes ingresar comentarios adicionales o información para tu '+tt+'.'}" onchange="F.obs=this.value">${esc(F.obs||'')}</textarea>
    ${!NOP.includes(t)?vpBox(tmp):''}
   </div><div class="tt"><div><span>Total Bruto:</span><b>${bruto.toFixed(2)}</b></div><div><span>Descuentos:</span><b>${(bruto-c.base).toFixed(2)}</b></div><div><span>Subtotal:</span><b>${c.base.toFixed(2)}</b></div><div><span>IVA:</span><b>${c.iva.toFixed(2)}</b></div>${rt?`<div><span>Retención:</span><b>- ${rt.toFixed(2)}</b></div>`:''}<div class="big"><span>Total Neto:</span><b>${neto.toFixed(2)}</b></div></div></div></div>
   <div class="dfoot"><button class="b1" onclick="closeM()">Cancelar</button><button class="b2" onclick="saveDoc()">Guardar</button></div>`;
   modalW(h)}
+function formRec(){const t=F.tipo,rc=t==='RC',tt=rc?'cliente':'proveedor',src=rc?'FV':'FC',{J}=D(),SM=saldoMap(J,src),
+  pend=S.docs.filter(d=>d.tipo===src&&d.ter===F.ter&&(SM[d.id]||0)>0).sort((a,b)=>a.fecha.localeCompare(b.fecha)),tot=+F.valor||0;F._tot=tot;
+  const tmp={id:'tmp',seq:1e9,tipo:t,fecha:F.fecha,ter:F.ter,valor:tot,medio:F.medio};
+  const h=`<div class="dh"><div><div class="ttl">${nuevo(t)}</div></div><button class="x" onclick="closeM()">✕</button></div><div class="bodyF">${hintBox(t)}
+  <div class="sg"><div>
+   <div class="fr"><label>Tipo</label><input readonly value="${TIPOS[t]}"></div>
+   <div class="fr"><label>${rc?'Cliente':'Proveedor'}</label><select onchange="F.ter=this.value;F.valor='';formDoc()"><option value="">Buscar...</option>${S.terceros.filter(x=>x.tipo===tt).map(x=>`<option value="${x.id}" ${F.ter===x.id?'selected':''}>${esc(x.nombre)} · ${esc(x.doc)}</option>`).join('')}</select></div>
+   <div class="fr"><label>Fecha de elaboración</label><input type="date" value="${F.fecha}" onchange="F.fecha=this.value;formDoc()"></div>
+  </div><div><div class="fr r2"><label>Número</label><input readonly value="${t}-${S.cons[t]||1}"></div></div></div>
+  <h4 class="sh">${rc?'Facturas de venta pendientes de cobro':'Facturas de compra pendientes de pago'}</h4>
+  ${F.ter?`<div class="tw" style="border:0"><table class="mtab sit"><tr><th>Comprobante</th><th>Fecha</th><th>Vence</th><th class="r">Total</th><th class="r">Saldo pendiente</th><th style="width:110px"></th></tr>${pend.map(d=>`<tr><td>${d.num}${d.numProv?' · '+esc(d.numProv):''}</td><td>${fDate(d.fecha)}</td><td>${fDate(addDays(d.fecha,d.dias||30))}</td><td class="r">${fmt(docTotal(d)-retAmt(d,docCalc(d).base))}</td><td class="r"><b>${fmt(SM[d.id])}</b></td><td><a class="al" onclick="F.valor=${SM[d.id]};F.concepto='${rc?'Cobro':'Pago'} de ${d.num}';formDoc()">Aplicar saldo</a></td></tr>`).join('')||`<tr><td colspan=6>Este ${tt} no tiene facturas pendientes.</td></tr>`}</table></div>`:'<div class="note">Elige el '+tt+' para ver sus facturas pendientes.</div>'}
+  <div class="bt"><div>
+   <h4 class="sh">Formas de ${rc?'pago (cómo recibes el dinero)':'pago (de dónde sale el dinero)'}</h4>
+   ${F.pagos&&F.pagos.length?'':`<div class="fpr"><select onchange="F.medio=this.value">${Object.keys(MED).map(k=>`<option value="${k}" ${F.medio===k?'selected':''}>${MED[k]}</option>`).join('')}</select><input readonly value="${tot.toFixed(2)}"></div>`}${fpMulti(tot)}
+   <h4 class="sh">Concepto</h4><textarea rows="2" placeholder="Por qué se ${rc?'recibe':'paga'} este dinero" onchange="F.concepto=this.value">${esc(F.concepto)}</textarea>
+   ${vpBox(tmp)}
+  </div><div class="tt"><div><span>Saldo pendiente:</span><b>${(F.ter?pend.reduce((a,d)=>a+SM[d.id],0):0).toFixed(2)}</b></div><div class="big"><span>Valor ${rc?'recibido':'pagado'}:</span><b><input type="number" min="0" style="width:130px;font-size:15px;text-align:right;padding:6px" value="${F.valor}" onchange="F.valor=this.value;formDoc()"></b></div></div></div></div>
+  <div class="dfoot"><button class="b1" onclick="closeM()">Cancelar</button><button class="b2" onclick="saveDoc()">Guardar</button></div>`;
+  modalW(h)}
 function formDoc(){
   if(TITEM.includes(F.tipo)){formItems();return}
+  if(F.tipo==='RC'||F.tipo==='CE'){formRec();return}
   const t=F.tipo,isI=TITEM.includes(t),tt=TCLI.includes(t)?'cliente':'proveedor',cr=TCR.includes(t);
   const sel=(o,cur,fn)=>`<select onchange="${fn}">${Object.keys(o).map(k=>`<option value="${k}" ${String(cur)===k?'selected':''}>${o[k]}</option>`).join('')}</select>`;
   const vpB=tmp=>`<details class="gd" style="margin-top:12px" ${F.vp?'open':''} ontoggle="F.vp=this.open"><summary>Ver contabilización (el asiento que se generará)</summary>${prevHTML(tmp)}</details>`;
@@ -615,16 +663,18 @@ function formDoc(){
     h+=`<div class="row"><div><label>Activo</label><select onchange="F.activo=this.value;formDoc()"><option value="">— elegir —</option>${act.map(a=>`<option value="${a.id}" ${F.activo===a.id?'selected':''}>${esc(a.nombre)} · costo ${fmt(a.costo)} · deprec. ${fmt(a.acum)}</option>`).join('')}</select></div><div><label>Valor de venta (0 si solo se da de baja)</label><input type="number" min="0" value="${F.valor}" onchange="F.valor=this.value;formDoc()"></div></div>${F.activo?prevHTML({id:'tmp',seq:1e9,tipo:'BA',fecha:F.fecha,activo:F.activo,valor:+F.valor||0,medio:F.medio}):''}`}
   else if(t==='GA'){const dd={tipo:'GA',base:F.base,ivaPct:F.ivaPct,rete:parseRet('GA',F.ret)},c=docCalc(dd),rt=retAmt(dd,c.base);
     h+=`<div class="row"><div><label>Cuenta de gasto</label><select onchange="F.cuenta=this.value">${GAS.map(c=>`<option value="${c}" ${F.cuenta===c?'selected':''}>${c} ${PUC[c]}</option>`).join('')}</select></div><div><label>Valor base</label><input type="number" min="0" value="${F.base}" onchange="F.base=this.value;formDoc()"></div><div><label>IVA</label>${sel({'0':'0%','19':'19%'},F.ivaPct,"F.ivaPct=+this.value;formDoc()")}</div></div><label>Concepto</label><input value="${esc(F.concepto)}" onchange="F.concepto=this.value"><div class="dcols"><div>${vpB({id:'tmp',seq:1e9,tipo:'GA',fecha:F.fecha,ter:F.ter,cuenta:F.cuenta,base:+F.base||0,ivaPct:F.ivaPct,pago:F.pago,medio:F.medio,dias:F.dias,rete:parseRet('GA',F.ret)})}</div><div class="tot"><div><span>Base</span><b>${fmt(c.base)}</b></div><div><span>IVA</span><b>${fmt(c.iva)}</b></div>${rt?`<div><span>Retención</span><b>- ${fmt(rt)}</b></div>`:''}<div class="g"><span>Total a pagar</span><b>${fmt(c.total-rt)}</b></div></div></div>`}
-  else if(t==='CC'){const sd=F.lines.reduce((s,l)=>s+(+l.d||0),0),sh=F.lines.reduce((s,l)=>s+(+l.h||0),0);
-    h+=`<label>Concepto</label><input value="${esc(F.concepto)}" onchange="F.concepto=this.value"><div class="tw" style="margin-top:8px"><table><tr><th>Cuenta</th><th style="width:130px">Débito</th><th style="width:130px">Crédito</th><th></th></tr>${F.lines.map((l,i)=>`<tr><td><select onchange="F.lines[${i}].c=this.value"><option value="">— elegir —</option>${Object.keys(PUC).map(c=>`<option value="${c}" ${l.c===c?'selected':''}>${c} ${PUC[c]}</option>`).join('')}</select></td><td><input type="number" min="0" value="${l.d}" onchange="F.lines[${i}].d=+this.value;formDoc()"></td><td><input type="number" min="0" value="${l.h}" onchange="F.lines[${i}].h=+this.value;formDoc()"></td><td><button class="btn del sm" onclick="F.lines.splice(${i},1);formDoc()">\u2715</button></td></tr>`).join('')}</table></div><p><button class="btn sec sm" onclick="F.lines.push({c:'',d:0,h:0});formDoc()">+ Agregar línea</button></p><div class="note">Débitos ${fmt(sd)} · Créditos ${fmt(sh)} · ${sd===sh&&sd>0?'<b>Cuadrado</b>':'<b>Descuadrado</b> (debe ser igual)'}</div>`}
+  else if(t==='CC'){const sd=F.lines.reduce((s,l)=>s+(+l.d||0),0),sh=F.lines.reduce((s,l)=>s+(+l.h||0),0),ok=sd===sh&&sd>0;
+    h+=`<div class="tw" style="border:0"><table class="mtab sit"><tr><th style="width:30px">#</th><th style="width:280px">Cuenta contable</th><th style="width:210px">Tercero</th><th>Descripción</th><th style="width:130px">Débito</th><th style="width:130px">Crédito</th><th style="width:34px"></th></tr>${F.lines.map((l,i)=>`<tr><td>${i+1}</td><td><select onchange="F.lines[${i}].c=this.value"><option value="">Buscar...</option>${Object.keys(PUC).sort().map(c=>`<option value="${c}" ${l.c===c?'selected':''}>${c} ${PUC[c]}</option>`).join('')}</select></td><td><select onchange="F.lines[${i}].ter=this.value"><option value="">—</option>${S.terceros.map(x=>`<option value="${x.id}" ${l.ter===x.id?'selected':''}>${esc(x.nombre)}</option>`).join('')}</select></td><td><input value="${esc(l.desc||'')}" onchange="F.lines[${i}].desc=this.value"></td><td><input type="number" min="0" value="${l.d}" onchange="F.lines[${i}].d=+this.value;formDoc()"></td><td><input type="number" min="0" value="${l.h}" onchange="F.lines[${i}].h=+this.value;formDoc()"></td><td><span class="trash" onclick="F.lines.splice(${i},1);formDoc()">✕</span></td></tr>`).join('')}</table></div><p><a class="al" onclick="F.lines.push({c:'',d:0,h:0});formDoc()">+Agregar otra línea</a></p>
+    <div class="bt"><div><h4 class="sh">Observaciones</h4><textarea rows="3" placeholder="Concepto del comprobante contable" onchange="F.concepto=this.value">${esc(F.concepto)}</textarea></div><div class="tt"><div><span>Total débitos:</span><b>${sd.toFixed(2)}</b></div><div><span>Total créditos:</span><b>${sh.toFixed(2)}</b></div><div class="big"><span>Diferencia:</span><b style="color:${ok?'#2e7d32':'#b3261e'}">${Math.abs(sd-sh).toFixed(2)} ${ok?'✓':''}</b></div></div></div>`}
   else if(t==='ND'||t==='DG'){const c=docCalc({tipo:t,base:F.base,ivaPct:F.ivaPct}),fpv=F.pago==='credito'?'credito':F.medio;
     h+=`<div class="row"><div><label>Cuenta de ingreso</label><select onchange="F.cuenta=this.value">${['413595','415505','421005','429595'].map(x=>`<option value="${x}" ${F.cuenta===x?'selected':''}>${x} ${PUC[x]}</option>`).join('')}</select></div><div><label>Valor base</label><input type="number" min="0" value="${F.base}" onchange="F.base=this.value;formDoc()"></div><div><label>IVA</label>${sel({'0':'0%','19':'19%'},F.ivaPct,"F.ivaPct=+this.value;formDoc()")}</div>${t==='DG'?`<div><label>Forma de pago</label>${sel({caja:'Efectivo - Caja general',banco:'Transferencia - Bancos',credito:'Crédito'},fpv,"fpSet(this.value)")}</div>`:''}${t==='ND'||F.pago==='credito'?`<div><label>Plazo (días)</label><input type="number" min="0" value="${F.dias}" onchange="F.dias=+this.value"></div>`:''}</div><label>Concepto (${t==='ND'?'por qué aumenta el valor de la venta':'de dónde proviene el ingreso'})</label><input value="${esc(F.concepto)}" onchange="F.concepto=this.value"><div class="dcols"><div>${vpB({id:'tmp',seq:1e9,tipo:t,fecha:F.fecha,ter:F.ter,cuenta:F.cuenta,base:+F.base||0,ivaPct:F.ivaPct,dias:F.dias,pago:F.pago,medio:F.medio})}</div><div class="tot"><div><span>Base</span><b>${fmt(c.base)}</b></div><div><span>IVA</span><b>${fmt(c.iva)}</b></div><div class="g"><span>${t==='ND'?'Total a cobrar':'Total a recibir'}</span><b>${fmt(c.total)}</b></div></div></div>`}
   else if(t==='DI'){h+=`<div class="row"><div><label>Período desde</label><input type="date" value="${F.desde}" onchange="F.desde=this.value;formDoc()"></div><div><label>Período hasta</label><input type="date" value="${F.hasta}" onchange="F.hasta=this.value;formDoc()"></div></div>${ivaBox(F.desde,F.hasta)}${prevHTML({id:'tmp',seq:1e9,tipo:'DI',fecha:F.fecha,desde:F.desde,hasta:F.hasta,medio:F.medio})}`}
   else if(t==='CI'){h+=cierreBox()+prevHTML({id:'tmp',seq:1e9,tipo:'CI',fecha:F.fecha})}
   else{const J=D().J,ped=t==='RC'?bal(J.filter(x=>x.ter===F.ter),'130505'):-bal(J.filter(x=>x.ter===F.ter),'220505');
     h+=`<div class="row"><div><label>Valor</label><input type="number" min="0" value="${F.valor}" onchange="F.valor=this.value"></div><div><label>Concepto</label><input value="${esc(F.concepto)}" onchange="F.concepto=this.value"></div></div>${F.ter?`<div class="note">Saldo pendiente de este tercero: <b>${fmt(ped)}</b></div>`:''}${vpB({id:'tmp',seq:1e9,tipo:t,fecha:F.fecha,ter:F.ter,valor:+F.valor||0,medio:F.medio})}`}
+  h+=fpGen();
   h+=`</div><div class="dfoot"><button class="b1" onclick="closeM()">Cancelar</button><button class="b2" onclick="saveDoc()">Guardar</button></div>`;modalW(h)}
-function prevHTML(tmp){const r=derive([...S.docs,tmp],S.productos),L=r.J.filter(x=>x.d.id==='tmp');
+function prevHTML(tmp){if(typeof F!=='undefined'&&F&&F.pagos&&F.pagos.length&&F.pago!=='credito'&&!tmp.pagos)tmp.pagos=F.pagos;const r=derive([...S.docs,tmp],S.productos),L=r.J.filter(x=>x.d.id==='tmp');
   return `<div class="note"><b>Así quedará el asiento contable:</b>${r.W.tmp?`<br><span class="badge w">${r.W.tmp}</span>`:''}<div class="tw"><table><tr><th>Cuenta</th><th class="r">Débito</th><th class="r">Crédito</th></tr>${L.map(x=>`<tr><td>${x.c} ${PUC[x.c]||''}</td><td class="r">${x.de?fmt(x.de):''}</td><td class="r">${x.ha?fmt(x.ha):''}</td></tr>`).join('')||'<tr><td colspan=3>Sin movimientos</td></tr>'}</table></div></div>`}
 function setP(i,pid){const l=F.lines[i];l.p=pid;if(pid){const p=prod(pid);l.precio=(F.tipo==='FV'||F.tipo==='NV'||F.tipo==='CZ'||F.tipo==='RM')?p.precio:p.costo}formDoc()}
 function saveDoc(){
@@ -648,8 +698,9 @@ function saveDoc(){
   else if(t==='DP'){if(S.docs.some(x=>x.tipo==='DP'&&x.fecha.slice(0,7)===F.fecha.slice(0,7)))return toast('Ya existe una depreciación de este mes');const pv=derive([...S.docs,{id:'tmp',seq:1e9,tipo:'DP',fecha:F.fecha}],S.productos);if(pv.W.tmp)return toast(pv.W.tmp);d.concepto='Depreciación de '+F.fecha.slice(0,7)}
   else if(t==='BA'){if(!F.activo)return toast('Elige el activo');const pv=derive([...S.docs,{id:'tmp',seq:1e9,tipo:'BA',fecha:F.fecha,activo:F.activo,valor:+F.valor||0,medio:F.medio}],S.productos);if(pv.W.tmp)return toast(pv.W.tmp);const a=pv.A.find(x=>x.id===F.activo);d.activo=F.activo;d.valor=+F.valor||0;d.medio=F.medio;d.concepto=(d.valor>0?'Venta de ':'Baja de ')+a.nombre}
   else if(t==='GA'){if(!(+F.base>0))return toast('Escribe el valor base');d.ter=F.ter;d.cuenta=F.cuenta;d.base=+F.base;d.ivaPct=F.ivaPct;d.pago=F.pago;d.medio=F.medio;d.dias=F.dias;d.concepto=F.concepto;d.rete=parseRet('GA',F.ret)}
-  else if(t==='CC'){const L=F.lines.filter(l=>l.c&&((+l.d)||(+l.h)));const sd=L.reduce((s,l)=>s+(+l.d||0),0),sh=L.reduce((s,l)=>s+(+l.h||0),0);if(!L.length||sd!==sh)return toast('El comprobante debe estar cuadrado');d.concepto=F.concepto;d.lines=L.map(l=>({c:l.c,d:+l.d||0,h:+l.h||0}))}
+  else if(t==='CC'){const L=F.lines.filter(l=>l.c&&((+l.d)||(+l.h)));const sd=L.reduce((s,l)=>s+(+l.d||0),0),sh=L.reduce((s,l)=>s+(+l.h||0),0);if(!L.length||sd!==sh)return toast('El comprobante debe estar cuadrado');d.concepto=F.concepto;d.lines=L.map(l=>({c:l.c,d:+l.d||0,h:+l.h||0,ter:l.ter||undefined}))}
   else{if(!(+F.valor>0))return toast('Escribe el valor');d.ter=F.ter;d.valor=+F.valor;d.medio=F.medio;d.concepto=F.concepto}
+  if(F.pagos&&F.pagos.length&&F.pago!=='credito'&&['FV','FC','GA','DG','RC','CE'].includes(t)){const sm=F.pagos.reduce((a,x)=>a+(+x.v||0),0);if(Math.round(sm)!==Math.round(F._tot||0))return toast('Las formas de pago deben sumar '+fmt(F._tot||0));d.pagos=F.pagos.filter(x=>+x.v>0).map(x=>({m:x.m,v:Math.round(+x.v)}));if(d.pagos.length<2){d.medio=d.pagos[0]?d.pagos[0].m:d.medio;delete d.pagos}}
   S.cons[t]=S.cons[t]||1;d.num=t+'-'+(S.cons[t]++);S.docs.push(d);
   if(F.cz){const q=S.docs.find(x=>x.id===F.cz);if(q)q.fact=d.num}
   save();closeM();render();toast(d.num+' guardado')}
@@ -667,11 +718,12 @@ function vConc(){
   <div class="tw"><table><tr><th></th><th>Fecha</th><th>Documento</th><th>Tercero / concepto</th><th class="r">Ingresa</th><th class="r">Sale</th></tr>${L.map(x=>`<tr><td><input type="checkbox" style="width:auto" ${S.conc[x.key]?'checked':''} onchange="toggleC('${x.key}')"></td><td>${x.fecha}</td><td>${x.d.num}</td><td>${x.ter?esc(ter(x.ter).nombre):esc(x.d.concepto||(x.d.ter?ter(x.d.ter).nombre:''))}</td><td class="r">${x.de?fmt(x.de):''}</td><td class="r">${x.ha?fmt(x.ha):''}</td></tr>`).join('')||'<tr><td colspan=6>Sin movimientos de bancos</td></tr>'}</table></div>`}
 
 /* ---------- Reportes ---------- */
+let RF={a:'',b:''};
 function vReportes(){
-  const {J,K,st,A}=D(),tabs=[['bp','Balance de prueba'],['er','Estado de resultados'],['bg','Balance general'],['aux','Libro auxiliar'],['car','Cartera'],['edad','Cartera por edades'],['inv','Inventario'],['af','Activos fijos'],['nom','Nómina']];
-  let h=`<div class="tabs">${tabs.map(x=>`<button class="${rep===x[0]?'on':''}" onclick="rep='${x[0]}';render()">${x[1]}</button>`).join('')}</div>`;
+  const D0=D(),{K,st,A}=D0,J=D0.J.filter(x=>(!RF.a||x.fecha>=RF.a)&&(!RF.b||x.fecha<=RF.b)),tabs=[['bp','Balance de prueba'],['er','Estado de resultados'],['bg','Balance general'],['aux','Libro auxiliar'],['car','Cartera'],['edad','Cartera por edades'],['inv','Inventario'],['af','Activos fijos'],['nom','Nómina']];
+  let h=`<div class="tabs">${tabs.map(x=>`<button class="${rep===x[0]?'on':''}" onclick="rep='${x[0]}';render()">${x[1]}</button>`).join('')}</div><div class="crb" style="display:block;margin-top:0"><div class="fx"><div class="tf"><label>Fecha desde</label><input type="date" value="${RF.a}" onchange="RF.a=this.value;render()"></div><div class="tf"><label>Fecha hasta</label><input type="date" value="${RF.b}" onchange="RF.b=this.value;render()"></div><div class="tf"><label>&nbsp;</label><a class="lnk" onclick="RF={a:'',b:''};render()">Limpiar filtros</a> &nbsp; <button class="btn sec sm" onclick="window.print()">Imprimir</button></div></div><small class="emp">Para el Balance general deja «Desde» vacío: muestra todo lo acumulado hasta la fecha de corte.</small></div>`;
   const acc={};J.forEach(x=>{const a=acc[x.c]||(acc[x.c]={de:0,ha:0});a.de+=x.de;a.ha+=x.ha});const cs=Object.keys(acc).sort();
-  const tbl=(rows,cols)=>`<div class="tw"><table><tr>${cols.map(c=>`<th class="${c[1]?'r':''}">${c[0]}</th>`).join('')}</tr>${rows.join('')||'<tr><td colspan=9>Sin información</td></tr>'}</table></div>`;
+  const tbl=(rows,cols)=>`<div class="tw"><table class="lst"><tr>${cols.map(c=>`<th class="${c[1]?'r':''}">${c[0]}</th>`).join('')}</tr>${rows.join('')||'<tr><td colspan=9>Sin información</td></tr>'}</table></div>`;
   if(rep==='bp'){let td=0,th=0;const rows=cs.map(c=>{const a=acc[c],s=a.de-a.ha;td+=a.de;th+=a.ha;return`<tr><td>${c}</td><td>${PUC[c]||''}</td><td class="r">${fmt(a.de)}</td><td class="r">${fmt(a.ha)}</td><td class="r">${s>=0?fmt(s):''}</td><td class="r">${s<0?fmt(-s):''}</td></tr>`});rows.push(`<tr><td colspan=2><b>Totales</b></td><td class="r"><b>${fmt(td)}</b></td><td class="r"><b>${fmt(th)}</b></td><td></td><td></td></tr>`);h+=tbl(rows,[['Cuenta'],['Nombre'],['Débitos',1],['Créditos',1],['Saldo deudor',1],['Saldo acreedor',1]])}
   else if(rep==='er'){const acc=accN(J),cs=Object.keys(acc).sort();h+=`<div class="hint">El estado de resultados no incluye el asiento de cierre: muestra lo que ganaste y gastaste en el período.</div>`;const sec=(p,n,sg)=>{let tot=0;const r=cs.filter(c=>c[0]===p).map(c=>{const v=sg*(acc[c].de-acc[c].ha);tot+=v;return`<tr><td>${c} ${PUC[c]||''}</td><td class="r">${fmt(v)}</td></tr>`});return{tot,html:`<tr><td colspan=2><b>${n}</b></td></tr>${r.join('')}<tr><td><b>Total ${n.toLowerCase()}</b></td><td class="r"><b>${fmt(tot)}</b></td></tr>`}};
     const i=sec('4','Ingresos',-1),c=sec('6','Costos de ventas',1),g=sec('5','Gastos',1);h+=tbl([i.html,c.html,`<tr><td><b>Utilidad bruta</b></td><td class="r"><b>${fmt(i.tot-c.tot)}</b></td></tr>`,g.html,`<tr><td><b>UTILIDAD DEL PERÍODO</b></td><td class="r"><b>${fmt(i.tot-c.tot-g.tot)}</b></td></tr>`],[['Concepto'],['Valor',1]])}
