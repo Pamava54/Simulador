@@ -67,10 +67,12 @@ const $=s=>document.querySelector(s);
 const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const fmt=n=>'$ '+Math.round(n||0).toLocaleString('es-CO');
 const today=()=>new Date().toISOString().slice(0,10);
+const codeOf=s=>String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9 ]/g,'').trim().replace(/\s+/g,'');
 const normCode=s=>String(s||'').trim().toLowerCase().replace(/\s+/g,'');
 function H(s){let h=1779033703^s.length;for(let i=0;i<s.length;i++){h=Math.imul(h^s.charCodeAt(i),3432918353);h=h<<13|h>>>19}return h>>>0}
-const SECRET='PV-clase-7Qm4',TEACH_HASH=1490599463;
-const studentPin=c=>String(H('s|'+c+'|'+SECRET)%9000+1000);
+const SECRET='PV-clase-7Qm4',TEACH_HASH=1490599463,NEMP=20;
+const PASS=(()=>{const A='ABCDEFGHJKMNPQRSTUVWXYZ23456789',o=[],used={};for(let n=1;n<=NEMP;n++){let k=0,p;do{p='';for(let i=0;i<5;i++)p+=A[H('c|'+n+'|'+k+'|'+i+'|'+SECRET)%A.length];k++}while(used[p]);used[p]=1;o.push(p)}return o})();
+const empOf=p=>PASS.indexOf(String(p||'').trim().toUpperCase().replace(/[\s-]/g,''))+1;
 const teachOK=p=>H('t|'+String(p||'').trim().toUpperCase()+'|'+SECRET)===TEACH_HASH;
 const mem={};
 const ls={get(k){try{const v=localStorage.getItem(k);return v==null?(mem[k]==null?null:mem[k]):v}catch(e){return mem[k]==null?null:mem[k]}},set(k,v){mem[k]=v;try{localStorage.setItem(k,v)}catch(e){}},del(k){delete mem[k];try{localStorage.removeItem(k)}catch(e){}}};
@@ -134,13 +136,14 @@ let U=null,S=null,view='inicio',rep='bp',repAcc='413595',tab='cliente',F=null,TP
 function newState(code){return{code,empresa:{nombre:'',nit:'',actividad:'',dir:'',tel:''},terceros:[],productos:[],docs:[],cons:CONS0(),conc:{},extracto:0,seq:20}}
 function save(){ls.set('pv2_d_'+U.code,JSON.stringify(S))}
 function login(){
-  const name=$('#ln').value.trim(),code=normCode($('#lc').value);
-  if(!name||!code)return toast('Escribe tu nombre y tu código');
-  if($('#lp').value.trim()!==studentPin(code))return toast('PIN incorrecto. Es el que aparece en tu hoja de documentos.');
-  doLogin(name,code)}
-function doLogin(name,code){
+  const name=$('#ln').value.trim().replace(/\s+/g,' ');
+  if(!name)return toast('Escribe tu nombre completo');
+  const n=empOf($('#lp').value);
+  if(!n)return toast('Contraseña incorrecta. Es la que aparece en tu hoja de documentos.');
+  doLogin(name,'e'+n+'_'+codeOf(name),n)}
+function doLogin(name,code,emp){
   const raw=ls.get('pv2_d_'+code);try{S=raw?JSON.parse(raw):newState(code)}catch(e){S=newState(code)}
-  U={name,code};S.conc=S.conc||{};const us=users();us[code]={name,t:Date.now()};ls.set('pv2_users',JSON.stringify(us));ls.set('pv2_last',JSON.stringify({name,code}));
+  U={name,code,emp};S.conc=S.conc||{};const us=users();us[code]={name,emp,t:Date.now()};ls.set('pv2_users',JSON.stringify(us));ls.set('pv2_last',JSON.stringify({name}));
   save();view='inicio';teacher=false;render()}
 function logout(){U=null;S=null;teacher=false;teacherOK=false;render()}
 const ter=id=>S.terceros.find(t=>t.id===id)||{nombre:'—'};
@@ -157,15 +160,14 @@ function render(){
   const t={inicio:'Inicio',terceros:'Terceros',inventario:'Inventario',conc:'Conciliación bancaria',reportes:'Reportes',config:'Configuración'};
   const body=view==='inicio'?vInicio():view==='terceros'?vTerceros():view==='inventario'?vInventario():TIPOS[view]?vDocs(view):view==='conc'?vConc():view==='reportes'?vReportes():vConfig();
   a.innerHTML=`<div class="wrap"><div class="side"><h1>PAMAVA</h1><small>Simulador contable · PAMAVA Soluciones</small>${nav.map(n=>`${n[0]==='CZ'||n[0]==='conc'||n[0]==='config'?'<hr>':''}<a class="${view===n[0]?'on':''}" onclick="go('${n[0]}')">${n[1]}</a>`).join('')}<hr><a onclick="logout()">Salir</a></div>
-  <div class="main"><div class="top"><div><h2>${TIPOS[view]?PLUR[view]:t[view]}</h2><div class="emp">${S.empresa.nombre?esc(S.empresa.nombre)+' · NIT '+esc(S.empresa.nit):'Empresa sin configurar'} · Estudiante: ${esc(U.name)} (${esc(U.code)})</div></div></div>${body}</div></div>`;
+  <div class="main"><div class="top"><div><h2>${TIPOS[view]?PLUR[view]:t[view]}</h2><div class="emp">${S.empresa.nombre?esc(S.empresa.nombre)+' · NIT '+esc(S.empresa.nit):'Empresa sin configurar'} · Estudiante: ${esc(U.name)} · Empresa ${U.emp}</div></div></div>${body}</div></div>`;
 }
 function go(v){view=v;render();window.scrollTo(0,0)}
 function loginView(){
   let last=null;try{last=JSON.parse(ls.get('pv2_last')||'null')}catch(e){}
   return `<div class="login"><h1>PAMAVA</h1><p><b>Simulador contable</b> — practica facturación, inventario y contabilidad sin riesgo. Tu empresa es solo tuya y se puede reiniciar cuando quieras.</p>
-  <label>Nombre completo</label><input id="ln" value="${last?esc(last.name):''}" placeholder="Ej: Ana Pérez">
-  <label>Tu código (el que te dio el profesor)</label><input id="lc" value="${last?esc(last.code):''}" placeholder="Ej: 1023">
-  <label>Tu PIN (está en tu hoja de documentos)</label><input id="lp" type="password" inputmode="numeric" placeholder="4 dígitos" onkeydown="if(event.key==='Enter')login()">
+  <label>Nombre completo (como aparece en tu hoja)</label><input id="ln" value="${last?esc(last.name):''}" placeholder="Ej: Ana María Pérez Gómez">
+  <label>Contraseña de tu empresa (está en tu hoja de documentos)</label><input id="lp" type="password" placeholder="Ej: K7M2X" onkeydown="if(event.key==='Enter')login()">
   <p style="margin-top:14px"><button class="btn" onclick="login()">Entrar a mi empresa</button> <button class="btn sec" onclick="teacherLogin()">Soy profesor</button></p>
   <div class="note">Tus datos se guardan en este mismo dispositivo y navegador. Si cambias de equipo, empezarás con tu empresa en blanco.</div>
   <div style="text-align:center;color:#8aa;font-size:11px;margin-top:10px">PAMAVA Soluciones</div></div>`}
@@ -316,9 +318,9 @@ function teacherEnter(){if(!teachOK($('#pin').value))return toast('Clave incorre
 function teacherView(){
   const us=users(),keys=Object.keys(us);
   return `<div class="main" style="max-width:980px;margin:auto"><div class="top"><h2>PAMAVA · Panel del profesor</h2><button class="btn sec" onclick="logout()">Salir</button></div>
-  <div class="card"><b>Estudiantes que han entrado en este equipo</b><div class="tw"><table><tr><th>Código</th><th>Nombre</th><th>PIN</th><th>Documentos</th><th></th></tr>${keys.map(c=>{let n=0;try{n=JSON.parse(ls.get('pv2_d_'+c)).docs.length}catch(e){}return`<tr><td>${esc(c)}</td><td>${esc(us[c].name)}</td><td>${studentPin(c)}</td><td>${n}</td><td class="r"><button class="btn sec sm" onclick="tOpen('${esc(c)}')">Abrir su trabajo</button> <button class="btn del sm" onclick="confirmM('¿Borrar los datos de ${esc(c)}?','tDel(\\'${esc(c)}\\')')">Borrar</button></td></tr>`}).join('')||'<tr><td colspan=5>Ninguno todavía</td></tr>'}</table></div><p><button class="btn del" onclick="confirmM('¿Borrar los datos de TODOS los estudiantes de este equipo?','tDelAll()')">Borrar todos los datos de este equipo</button></p></div>
+  <div class="card"><b>Estudiantes que han entrado en este equipo</b><div class="tw"><table><tr><th>Nombre</th><th>Empresa</th><th>Contraseña</th><th>Documentos</th><th></th></tr>${keys.map(c=>{let n=0;try{n=JSON.parse(ls.get('pv2_d_'+c)).docs.length}catch(e){}return`<tr><td>${esc(us[c].name)}</td><td>${us[c].emp||''}</td><td>${PASS[(us[c].emp||1)-1]}</td><td>${n}</td><td class="r"><button class="btn sec sm" onclick="tOpen('${esc(c)}')">Abrir su trabajo</button> <button class="btn del sm" onclick="confirmM('¿Borrar los datos de ${esc(c)}?','tDel(\\'${esc(c)}\\')')">Borrar</button></td></tr>`}).join('')||'<tr><td colspan=5>Ninguno todavía</td></tr>'}</table></div><p><button class="btn del" onclick="confirmM('¿Borrar los datos de TODOS los estudiantes de este equipo?','tDelAll()')">Borrar todos los datos de este equipo</button></p></div>
     <div class="note">Este simulador está en blanco: los estudiantes crean la empresa, los terceros, los productos y los documentos a partir de las hojas que imprimes con el generador de documentos. Los datos de cada estudiante se guardan en su propio dispositivo; allí puede borrarlos en Configuración.</div></div>`}
-function tOpen(c){const us=users();doLogin(us[c].name,c)}
+function tOpen(c){const us=users();doLogin(us[c].name,c,us[c].emp)}
 function tDel(c){ls.del('pv2_d_'+c);const us=users();delete us[c];ls.set('pv2_users',JSON.stringify(us));closeM();render()}
 function tDelAll(){Object.keys(users()).forEach(c=>ls.del('pv2_d_'+c));ls.set('pv2_users','{}');closeM();render()}
 

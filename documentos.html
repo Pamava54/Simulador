@@ -67,6 +67,7 @@ const $=s=>document.querySelector(s);
 const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const fmt=n=>'$ '+Math.round(n||0).toLocaleString('es-CO');
 const today=()=>new Date().toISOString().slice(0,10);
+const codeOf=s=>String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9 ]/g,'').trim().replace(/\s+/g,'');
 const normCode=s=>String(s||'').trim().toLowerCase().replace(/\s+/g,'');
 const mem={};
 const ls={get(k){try{const v=localStorage.getItem(k);return v==null?(mem[k]==null?null:mem[k]):v}catch(e){return mem[k]==null?null:mem[k]}},set(k,v){mem[k]=v;try{localStorage.setItem(k,v)}catch(e){}},del(k){delete mem[k];try{localStorage.removeItem(k)}catch(e){}}};
@@ -213,27 +214,32 @@ function paperExtracto(base,pack){
   return `<div class="paper"><div class="ph"><div><b>BANCO ANDINO · EXTRACTO BANCARIO</b><br>Titular: ${esc(e.nombre)} · NIT ${e.nit}</div><div style="text-align:right">Período ${PERIODO}</div></div><table><tr><th>Fecha</th><th>Descripción</th><th class="r">Ingresa</th><th class="r">Sale</th><th class="r">Saldo</th></tr>${rows.map(x=>`<tr><td>${x.f}</td><td>${x.t}</td><td class="r">${x.de?fmt(x.de):''}</td><td class="r">${x.ha?fmt(x.ha):''}</td><td class="r">${fmt(x.s)}</td></tr>`).join('')}<tr><td colspan=4 class="r"><b>SALDO FINAL DEL EXTRACTO</b></td><td class="r"><b>${fmt(rows.length?rows[rows.length-1].s:0)}</b></td></tr></table><div class="todo">▶ Úsalo en: <b>Conciliación bancaria</b> (compara con tus libros y registra lo que falte)</div><div class="wm">PAMAVA Soluciones</div></div>`}
 
 
-const studentPin=c=>String(H('s|'+c+'|'+SECRET)%9000+1000);
-const SECRET='PV-clase-7Qm4',TEACH_HASH=1490599463;
+const SECRET='PV-clase-7Qm4',TEACH_HASH=1490599463,NEMP=20;
+const PASS=(()=>{const A='ABCDEFGHJKMNPQRSTUVWXYZ23456789',o=[],used={};for(let n=1;n<=NEMP;n++){let k=0,p;do{p='';for(let i=0;i<5;i++)p+=A[H('c|'+n+'|'+k+'|'+i+'|'+SECRET)%A.length];k++}while(used[p]);used[p]=1;o.push(p)}return o})();
+const empOf=p=>PASS.indexOf(String(p||'').trim().toUpperCase().replace(/[\s-]/g,''))+1;
 const teachOK=p=>H('t|'+String(p||'').trim().toUpperCase()+'|'+SECRET)===TEACH_HASH;
-function packHTML(code,name,teacherKey){
-  const base=genBase(code),pk=genPack(code,base),e=base.empresa,ini=base.ini;
-  const sec=(n,t,body,donde)=>`<div class="paper"><div class="ph"><div class="pt">${n}. ${t}</div><div style="text-align:right">${esc(name)} · ${esc(code)}</div></div>${body}<div class="todo">▶ ${donde}</div><div class="wm">PAMAVA Soluciones</div></div>`;
-  const head=`<div class="card"><h2 style="margin:0;color:#12365f">PAMAVA · Simulador contable — Hojas de práctica</h2>Estudiante: <b>${esc(name)}</b> · Código: <b>${esc(code)}</b><br>Período: ${PERIODO} · IVA 19%<br>PIN para entrar al simulador: <b style="font-size:18px;letter-spacing:2px">${studentPin(code)}</b><div class="note">El simulador empieza en blanco. Con estas hojas montas tu empresa: primero los pasos 1 a 4 y luego registras los documentos del mes, en el orden en que aparecen.</div></div>`;
+
+const EMPC=(()=>{const used={},o=[];for(let n=1;n<=NEMP;n++){let k=0,code,nm;do{code='empresa'+n+(k?'x'+k:'');nm=genBase(code).empresa.nombre;k++}while(used[nm]);used[nm]=1;o.push(code)}return o})();
+function packHTML(n,name){
+  const code=EMPC[n-1],base=genBase(code),pk=genPack(code,base),e=base.empresa,ini=base.ini;
+  const who=name?esc(name):'Empresa '+n;
+  const sec=(k,t,body,donde)=>`<div class="paper"><div class="ph"><div class="pt">${k}. ${t}</div><div style="text-align:right">Empresa ${n} · ${who}</div></div>${body}<div class="todo">▶ ${donde}</div><div class="wm">PAMAVA Soluciones</div></div>`;
+  const head=`<div class="card"><h2 style="margin:0;color:#12365f">PAMAVA · Simulador contable — Hojas de práctica</h2>Estudiante: ${name?'<b>'+esc(name)+'</b>':'______________________________________'}<br><span style="font-size:17px"><b>Empresa ${n}</b> · Contraseña para entrar al simulador: <b style="font-size:20px;letter-spacing:3px">${PASS[n-1]}</b></span><br>Período: ${PERIODO} · IVA 19%<div class="note">En el simulador escribe tu nombre completo y esta contraseña. El simulador empieza en blanco: con estas hojas montas tu empresa, primero los pasos 1 a 4 y luego los documentos del mes, en el orden en que aparecen.</div></div>`;
   const s1=sec(1,'Datos de la empresa',`<table><tr><th>Dato</th><th>Valor</th></tr><tr><td>Razón social</td><td><b>${esc(e.nombre)}</b></td></tr><tr><td>NIT</td><td>${e.nit}</td></tr><tr><td>Actividad</td><td>${esc(e.actividad)}</td></tr><tr><td>Dirección</td><td>${esc(e.dir)}</td></tr><tr><td>Teléfono</td><td>${esc(e.tel)}</td></tr></table>`,'Escribe estos datos en: <b>Configuración → Datos de la empresa</b>');
   const s2=sec(2,'Saldo inicial de la empresa',`<p>Fecha: <b>${ini.fecha}</b></p><table><tr><th>Cuenta</th><th>Nombre</th><th class="r">Débito</th><th class="r">Crédito</th></tr>${ini.lines.map(l=>`<tr><td>${l.c}</td><td>${PUC[l.c]}</td><td class="r">${l.d?fmt(l.d):''}</td><td class="r">${l.h?fmt(l.h):''}</td></tr>`).join('')}</table>`,'Regístralo en: <b>Comprobantes contables → Crear comprobante contable</b> (concepto: Saldo inicial)');
   const tl=t=>base.terceros.filter(x=>x.tipo===t).map(x=>`<tr><td>${x.tipoDoc} ${x.doc}</td><td>${esc(x.nombre)}</td><td>${esc(x.dir)}</td><td>${esc(x.tel)}</td></tr>`).join('');
   const s3=sec(3,'Clientes y proveedores',`<b>Clientes</b><table><tr><th>Documento</th><th>Nombre</th><th>Dirección</th><th>Teléfono</th></tr>${tl('cliente')}</table><b>Proveedores</b><table><tr><th>Documento</th><th>Nombre</th><th>Dirección</th><th>Teléfono</th></tr>${tl('proveedor')}</table>`,'Créalos en: <b>Terceros → + Nuevo tercero</b> (cada uno en su pestaña: clientes o proveedores)');
   const s4=sec(4,'Productos',`<table><tr><th>Código</th><th>Producto</th><th class="r">Costo</th><th class="r">Precio de venta</th><th class="r">IVA</th></tr>${base.productos.map(p=>`<tr><td>${p.cod}</td><td>${esc(p.nombre)}</td><td class="r">${fmt(p.costo)}</td><td class="r">${fmt(p.precio)}</td><td class="r">${p.iva}%</td></tr>`).join('')}</table>`,'Créalos en: <b>Inventario → + Nuevo producto</b>. Las existencias no se escriben: llegan con las facturas de compra.');
   const order=['FC','FV','CZ','NV','NP','GA','RC','CE','CC'];
-  const docs=order.flatMap(t=>pk.filter(d=>d.tipo===t&&!d.hide)).map(d=>paperHTML(d,base)).join('');
-  const body=`${head}${s1}${s2}${s3}${s4}<div style="page-break-before:always"><div class="card"><b>5. Documentos del mes</b> — registra cada uno en su módulo (compras primero, para que haya mercancía que vender).</div>${docs}${paperExtracto(base,pk)}</div>`;
-  return body}
-function keyHTML(code,name){
-  const b=genBase(code),pk=genPack(code,b),r=derive([b.ini,...pk],b.productos),k=kpis(r.J,r.st,b.productos);
+  const docs=order.flatMap(t=>pk.filter(x=>x.tipo===t&&!x.hide)).map(x=>paperHTML(x,base)).join('');
+  return `${head}${s1}${s2}${s3}${s4}<div style="page-break-before:always"><div class="card"><b>5. Documentos del mes</b> — registra cada uno en su módulo (compras primero, para que haya mercancía que vender).</div>${docs}${paperExtracto(base,pk)}</div>`}
+function keyHTML(n){
+  const b=genBase(EMPC[n-1]),pk=genPack(EMPC[n-1],b),r=derive([b.ini,...pk],b.productos),k=kpis(r.J,r.st,b.productos);
   const rows=[['Ventas',k.ventas],['Costo de ventas',k.costoVentas],['Gastos',k.gastos],['Utilidad del período',k.utilidad],['Bancos',k.bancos],['Caja',k.caja],['Clientes por cobrar',k.clientes],['Proveedores por pagar',k.proveedores],['Inventario',k.inventario],['IVA por pagar (generado − descontable)',k.ivaPagar],['Saldo final del extracto bancario',(extractoData(b,pk).slice(-1)[0]||{s:0}).s]];
-  return `<div class="card" style="page-break-before:always"><b>${esc(name)}</b> (${esc(code)}) — ${esc(b.empresa.nombre)}<table><tr><th>Concepto</th><th class="r">Resultado esperado</th></tr>${rows.map(a=>`<tr><td>${a[0]}</td><td class="r">${fmt(a[1])}</td></tr>`).join('')}</table></div>`}
-function parseList(txt){return txt.split(/\n/).map(l=>l.trim()).filter(Boolean).map(l=>{const m=l.split(/[,;\t]/);return{code:normCode(m[0]),name:(m[1]||m[0]).trim()}}).filter(x=>x.code)}
+  return `<div class="card" style="page-break-before:always"><b>Empresa ${n}</b> (contraseña ${PASS[n-1]}) — ${esc(b.empresa.nombre)}<table><tr><th>Concepto</th><th class="r">Resultado esperado</th></tr>${rows.map(a=>`<tr><td>${a[0]}</td><td class="r">${fmt(a[1])}</td></tr>`).join('')}</table></div>`}
+function listaHTML(){
+  return `<div class="card"><h2 style="margin:0;color:#12365f">PAMAVA · Listado de empresas y contraseñas</h2><table><tr><th>N.º</th><th>Empresa</th><th>NIT</th><th>Actividad</th><th>Contraseña</th><th>Estudiante asignado</th></tr>${PASS.map((p,i)=>{const e=genBase(EMPC[i]).empresa;return`<tr><td>${i+1}</td><td>${esc(e.nombre)}</td><td>${e.nit}</td><td>${esc(e.actividad)}</td><td><b style="letter-spacing:2px">${p}</b></td><td style="min-width:170px">&nbsp;</td></tr>`}).join('')}</table></div>`}
+function parseAsig(txt){return txt.split(/\n/).map(l=>l.trim()).filter(Boolean).map(l=>{const m=l.match(/^(\d{1,2})\s*[,;.\-:)\t ]\s*(.+)$/);return m&&+m[1]>=1&&+m[1]<=NEMP?{n:+m[1],name:m[2].trim().replace(/\s+/g,' ')}:null}).filter(Boolean)}
 
 let mode='est',out='',tOK=false,TXT='';
 function app(){
@@ -241,20 +247,23 @@ function app(){
   let h=`<div class="main" style="max-width:980px;margin:auto"><div class="top noprint"><div><h2>PAMAVA · Documentos de práctica</h2><div class="emp">Simulador contable · PAMAVA Soluciones</div></div></div>
   <div class="tabs noprint"><button class="${mode==='est'?'on':''}" onclick="mode='est';out='';app()">Soy estudiante</button><button class="${mode==='prof'?'on':''}" onclick="mode='prof';out='';app()">Soy profesor</button></div>`;
   if(mode==='est'){
-    h+=`<div class="card noprint"><p>Escribe tu nombre, tu código y tu PIN (los que te dio el profesor) para ver tus hojas de práctica. Luego pulsa <b>Imprimir</b>.</p><div class="row"><div><label>Nombre completo</label><input id="n1" placeholder="Ej: Ana Pérez"></div><div><label>Tu código</label><input id="c1" placeholder="Ej: 1023"></div><div><label>Tu PIN</label><input id="p1" type="password" inputmode="numeric" placeholder="4 dígitos" onkeydown="if(event.key==='Enter')genEst()"></div></div><p><button class="btn" onclick="genEst()">Ver mis documentos</button></p></div>`;
+    h+=`<div class="card noprint"><p>Escribe tu nombre completo y la contraseña de tu empresa (la que te entregó el profesor) para ver tus hojas de práctica. Luego pulsa <b>Imprimir</b>.</p><div class="row"><div><label>Nombre completo</label><input id="n1" placeholder="Ej: Ana María Pérez Gómez"></div><div><label>Contraseña de tu empresa</label><input id="p1" type="password" placeholder="Ej: K7M2X" onkeydown="if(event.key==='Enter')genEst()"></div></div><p><button class="btn" onclick="genEst()">Ver mis documentos</button></p></div>`;
   }else if(!tOK){
     h+=`<div class="card noprint"><label>Clave del docente</label><input id="pin" type="password" onkeydown="if(event.key==='Enter')profIn()"><p><button class="btn" onclick="profIn()">Entrar</button></p></div>`;
   }else{
-    h+=`<div class="card noprint"><b>Lista de estudiantes</b><p>Uno por línea: <code>código, nombre</code>. Cada código genera siempre la misma empresa y los mismos documentos.</p><textarea id="tl" rows="7" placeholder="1023, Ana Pérez&#10;1024, Luis Gómez">${esc(TXT)}</textarea><p><button class="btn" onclick="genProf(0)">Documentos de todos (para imprimir)</button> <button class="btn sec" onclick="genProf(1)">Hoja de respuestas del docente</button> <button class="btn sec" onclick="genPins()">Lista de PIN</button></p></div>`;
+    h+=`<div class="card noprint"><b>1. Listado de las ${NEMP} empresas y contraseñas</b><p>Con este listado decides qué empresa le toca a cada estudiante (hay una columna para anotar el nombre).</p><button class="btn" onclick="showLista()">Ver listado</button></div>
+    <div class="card noprint"><b>2. Imprimir documentos</b><div class="row"><div><label>Empresa</label><select id="se">${PASS.map((p,i)=>`<option value="${i+1}">Empresa ${i+1}</option>`).join('')}</select></div></div><p><button class="btn" onclick="genOne(0)">Documentos de esa empresa</button> <button class="btn sec" onclick="genOne(1)">Hoja de respuestas de esa empresa</button></p><p><button class="btn" onclick="genAll(0)">Documentos de las ${NEMP} empresas</button> <button class="btn sec" onclick="genAll(1)">Hoja de respuestas de las ${NEMP}</button></p></div>
+    <div class="card noprint"><b>3. Documentos con el nombre del estudiante (opcional)</b><p>Una línea por estudiante: <code>número de empresa, nombre</code>. Cada hoja saldrá con su nombre impreso.</p><textarea id="tl" rows="6" placeholder="1, Ana María Pérez Gómez&#10;2, Luis Fernando Gómez Rojas">${esc(TXT)}</textarea><p><button class="btn" onclick="genAsig()">Documentos con nombre</button></p></div>`;
   }
   if(out)h+=`<p class="noprint"><button class="btn" onclick="window.print()">Imprimir / guardar como PDF</button></p>${out}`;
   A.innerHTML=h+`</div>`}
-function genEst(){const n=$('#n1').value.trim(),c=normCode($('#c1').value);if(!n||!c)return toast('Escribe tu nombre y tu código');if($('#p1').value.trim()!==studentPin(c))return toast('PIN incorrecto');out=packHTML(c,n);app();window.scrollTo(0,0)}
+function genEst(){const nm=$('#n1').value.trim().replace(/\s+/g,' '),n=empOf($('#p1').value);if(!nm)return toast('Escribe tu nombre completo');if(!n)return toast('Contraseña incorrecta');out=packHTML(n,nm);app();window.scrollTo(0,0)}
 function profIn(){if(!teachOK($('#pin').value))return toast('Clave incorrecta');tOK=true;app()}
-function genPins(){TXT=$('#tl').value;const l=parseList(TXT);if(!l.length)return toast('Escribe al menos un estudiante');out=`<div class="card"><b>Lista de PIN de los estudiantes</b><table><tr><th>Código</th><th>Nombre</th><th>PIN</th></tr>${l.map(x=>`<tr><td>${esc(x.code)}</td><td>${esc(x.name)}</td><td><b>${studentPin(x.code)}</b></td></tr>`).join('')}</table></div>`;app();window.scrollTo(0,0)}
-function genProf(key){TXT=$('#tl').value;const l=parseList(TXT);if(!l.length)return toast('Escribe al menos un estudiante');out=key?l.map(x=>keyHTML(x.code,x.name)).join(''):l.map((x,i)=>`<div style="${i?'page-break-before:always':''}">${packHTML(x.code,x.name)}</div>`).join('');app();window.scrollTo(0,0)}
+function showLista(){out=listaHTML();app();window.scrollTo(0,0)}
+function genOne(key){const n=+$('#se').value;out=key?keyHTML(n):packHTML(n,'');app();window.scrollTo(0,0)}
+function genAll(key){out=PASS.map((p,i)=>key?keyHTML(i+1):`<div style="${i?'page-break-before:always':''}">${packHTML(i+1,'')}</div>`).join('');app();window.scrollTo(0,0)}
+function genAsig(){TXT=$('#tl').value;const l=parseAsig(TXT);if(!l.length)return toast('Escribe líneas como: 1, Ana Pérez');out=l.map((x,i)=>`<div style="${i?'page-break-before:always':''}">${packHTML(x.n,x.name)}</div>`).join('');app();window.scrollTo(0,0)}
 app();
-
 </script>
 </body>
 </html>
