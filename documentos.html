@@ -76,9 +76,23 @@ function toast(t){const e=$('#toast');e.textContent=t;e.style.display='block';cl
 
 
 /* ---------- PUC básico ---------- */
-const PUC={'110505':'Caja general','111005':'Bancos - moneda nacional','130505':'Clientes nacionales','135515':'Retención en la fuente a favor','143505':'Mercancías no fabricadas por la empresa','220505':'Proveedores nacionales','233595':'Otros costos y gastos por pagar','236515':'Retención en la fuente - honorarios','236525':'Retención en la fuente - servicios','236540':'Retención en la fuente - compras','240801':'IVA generado','240802':'IVA descontable','310505':'Capital social','413595':'Ingresos por venta de mercancías','512010':'Arrendamientos','513525':'Acueducto y alcantarillado','513530':'Energía eléctrica','513535':'Teléfono','519595':'Gastos diversos','530505':'Gastos bancarios','613595':'Costo de ventas de mercancías'};
-const TIPOS={CZ:'Cotización',FV:'Factura de venta',NV:'Nota crédito de venta',FC:'Factura de compra',NP:'Nota crédito de compra',GA:'Documento de gasto',RC:'Recibo de caja',CE:'Comprobante de egreso',CC:'Comprobante contable'};
-const PLUR={CZ:'Cotizaciones',FV:'Facturas de venta',NV:'Notas crédito de venta',FC:'Facturas de compra',NP:'Notas crédito de compra',GA:'Documentos de gasto',RC:'Recibos de caja',CE:'Comprobantes de egreso',CC:'Comprobantes contables'};
+const PUC={'110505':'Caja general','111005':'Bancos - moneda nacional','130505':'Clientes nacionales','135515':'Retención en la fuente a favor','143505':'Mercancías no fabricadas por la empresa','220505':'Proveedores nacionales','233595':'Otros costos y gastos por pagar','236515':'Retención en la fuente - honorarios','236525':'Retención en la fuente - servicios','236540':'Retención en la fuente - compras','240801':'IVA generado','240802':'IVA descontable','310505':'Capital social','413595':'Ingresos por venta de mercancías','512010':'Arrendamientos','513525':'Acueducto y alcantarillado','513530':'Energía eléctrica','513535':'Teléfono','519595':'Gastos diversos','530505':'Gastos bancarios','613595':'Costo de ventas de mercancías','151605':'Edificios','152005':'Maquinaria y equipo','152405':'Muebles y enseres','152805':'Equipos de procesamiento de datos','154008':'Automóviles, camperos y camionetas','159205':'Deprec. acumulada - Construcciones y edificaciones','159210':'Deprec. acumulada - Maquinaria y equipo','159215':'Deprec. acumulada - Equipo de oficina','159220':'Deprec. acumulada - Equipo de computación y comunicación','159235':'Deprec. acumulada - Flota y equipo de transporte','516005':'Depreciación - Construcciones y edificaciones','516010':'Depreciación - Maquinaria y equipo','516015':'Depreciación - Equipo de oficina','516020':'Depreciación - Equipo de computación y comunicación','516035':'Depreciación - Flota y equipo de transporte','424505':'Utilidad en venta de propiedades, planta y equipo','531005':'Pérdida en venta y retiro de bienes','510506':'Sueldos','510527':'Auxilio de transporte','510530':'Cesantías','510533':'Intereses sobre cesantías','510536':'Prima de servicios','510539':'Vacaciones','510568':'Aportes a la ARL','510569':'Aportes a EPS','510570':'Aportes a fondos de pensiones','510572':'Aportes a cajas de compensación familiar','510575':'Aportes al ICBF','510578':'Aportes al SENA','237005':'Aportes a EPS por pagar','237006':'Aportes a ARL por pagar','237010':'Aportes a cajas, SENA e ICBF por pagar','238030':'Fondos de pensiones por pagar','250505':'Salarios por pagar','251005':'Cesantías consolidadas','251505':'Intereses sobre cesantías por pagar','252005':'Prima de servicios por pagar','252505':'Vacaciones consolidadas'};
+const TIPOS={CZ:'Cotización',FV:'Factura de venta',NV:'Nota crédito de venta',FC:'Factura de compra',NP:'Nota crédito de compra',GA:'Documento de gasto',RC:'Recibo de caja',CE:'Comprobante de egreso',CC:'Comprobante contable',AF:'Compra de activo fijo',DP:'Depreciación mensual',BA:'Baja o venta de activo',NO:'Liquidación de nómina',PN:'Pago de nómina'};
+const PLUR={CZ:'Cotizaciones',FV:'Facturas de venta',NV:'Notas crédito de venta',FC:'Facturas de compra',NP:'Notas crédito de compra',GA:'Documentos de gasto',RC:'Recibos de caja',CE:'Comprobantes de egreso',CC:'Comprobantes contables',AF:'Compras de activos fijos',DP:'Depreciación mensual',BA:'Baja o venta de activos',NO:'Liquidaciones de nómina',PN:'Pagos de nómina'};
+const ACT={of:{n:'Muebles y enseres (oficina)',a:'152405',ac:'159215',g:'516015',v:120},co:{n:'Equipo de cómputo y comunicación',a:'152805',ac:'159220',g:'516020',v:60},ma:{n:'Maquinaria y equipo',a:'152005',ac:'159210',g:'516010',v:120},fl:{n:'Vehículos',a:'154008',ac:'159235',g:'516035',v:60},ed:{n:'Edificios',a:'151605',ac:'159205',g:'516005',v:240}};
+/*NOM*/
+const NOM={smmlv:1750905,aux:249095,salud:0.04,pens:0.04,sEmp:0.085,pEmp:0.12,arl:0.00522,caja:0.04,sena:0.02,icbf:0.03,ces:0.0833,int:0.01,prima:0.0833,vac:0.0417};
+function nomCalc(emps,exon){
+  const R=Math.round,rows=[],T={sal:0,aux:0,salud:0,pens:0,neto:0,pEmp:0,arl:0,caja:0,sEmp:0,sena:0,icbf:0,ces:0,int:0,prima:0,vac:0};
+  (emps||[]).forEach(e=>{const sal=R(+e.salario||0),aux=sal<=2*NOM.smmlv?NOM.aux:0,sa=R(sal*NOM.salud),pe=R(sal*NOM.pens)+(sal>=4*NOM.smmlv?R(sal*0.01):0),neto=sal+aux-sa-pe;
+    const ex=exon&&sal<10*NOM.smmlv,o={nombre:e.nombre,sal,aux,salud:sa,pens:pe,neto,pEmp:R(sal*NOM.pEmp),arl:R(sal*NOM.arl),caja:R(sal*NOM.caja),sEmp:ex?0:R(sal*NOM.sEmp),sena:ex?0:R(sal*NOM.sena),icbf:ex?0:R(sal*NOM.icbf),ces:R((sal+aux)*NOM.ces),int:R((sal+aux)*NOM.int),prima:R((sal+aux)*NOM.prima),vac:R(sal*NOM.vac)};
+    rows.push(o);Object.keys(T).forEach(k=>T[k]+=o[k])});
+  const dev=T.sal+T.aux,ded=T.salud+T.pens,apo=T.pEmp+T.arl+T.caja+T.sEmp+T.sena+T.icbf,prov=T.ces+T.int+T.prima+T.vac;
+  const L=[['510506',T.sal,0],['510527',T.aux,0],['237005',0,T.salud+T.sEmp],['238030',0,T.pens+T.pEmp],['250505',0,T.neto],['510570',T.pEmp,0],['510568',T.arl,0],['237006',0,T.arl],['510572',T.caja,0],['510569',T.sEmp,0],['510578',T.sena,0],['510575',T.icbf,0],['237010',0,T.caja+T.sena+T.icbf],['510530',T.ces,0],['251005',0,T.ces],['510533',T.int,0],['251505',0,T.int],['510536',T.prima,0],['252005',0,T.prima],['510539',T.vac,0],['252505',0,T.vac]];
+  return{rows,tot:{...T,dev,ded,apo,prov,costo:dev+apo+prov},lines:L}}
+function nomTable(d){const c=nomCalc(d.emps,d.exon),f=x=>x?fmt(x):'-';
+  return `<div class="tw"><table><tr><th>Empleado</th><th class="r">Salario</th><th class="r">Aux. transp.</th><th class="r">Salud 4%</th><th class="r">Pensión 4%</th><th class="r">Neto a pagar</th></tr>${c.rows.map(r=>`<tr><td>${esc(r.nombre)}</td><td class="r">${fmt(r.sal)}</td><td class="r">${f(r.aux)}</td><td class="r">${fmt(r.salud)}</td><td class="r">${fmt(r.pens)}</td><td class="r"><b>${fmt(r.neto)}</b></td></tr>`).join('')}<tr><td><b>Total</b></td><td class="r">${fmt(c.tot.sal)}</td><td class="r">${f(c.tot.aux)}</td><td class="r">${fmt(c.tot.salud)}</td><td class="r">${fmt(c.tot.pens)}</td><td class="r"><b>${fmt(c.tot.neto)}</b></td></tr></table></div><p class="emp">Aportes de la empresa: ${fmt(c.tot.apo)} · Provisiones (cesantías, intereses, prima, vacaciones): ${fmt(c.tot.prov)} · Costo total de la nómina: <b>${fmt(c.tot.costo)}</b></p>`}
+/*FINNOM*/
 const CONS0=()=>({CZ:1,FV:1,NV:1,FC:1,NP:1,GA:1,RC:1,CE:1,CC:2});
 /* ---------- Generador (determinista por código) ---------- */
 function H(s){let h=1779033703^s.length;for(let i=0;i<s.length;i++){h=Math.imul(h^s.charCodeAt(i),3432918353);h=h<<13|h>>>19}return h>>>0}
@@ -93,7 +107,7 @@ const nit=n=>dots(n)+'-'+dv(n);
 const CATS={papeleria:['Papelería y útiles',[['Cuaderno cuadriculado 100 hojas',2800],['Resma papel carta 500 hojas',12500],['Lapicero azul (caja x12)',9000],['Marcadores borrables x4',7500],['Carpeta plástica con gancho',2200],['Tijeras escolares',3200],['Pegante en barra',1800],['Calculadora básica',16000]]],
 ferreteria:['Ferretería',[['Martillo de uña 16 oz',14000],['Destornillador de pala',6500],['Alicate universal',18000],['Cinta métrica 5 m',7500],['Tornillos (caja x100)',5500],['Cable eléctrico #12 (metro)',1900],['Bombillo LED 9W',4200],['Candado 40 mm',11000]]],
 tecnologia:['Tecnología',[['Mouse óptico USB',14000],['Teclado USB',28000],['Memoria USB 32 GB',21000],['Audífonos de diadema',32000],['Cable HDMI 2 m',12000],['Cargador universal',25000],['Disco duro externo 1 TB',210000],['Parlante bluetooth',48000]]]};
-const NOM=['Carlos','Ana','Luis','María','Jorge','Paula','Andrés','Laura','Camilo','Sandra','Julián','Diana','Mateo','Natalia'];
+const NOMBRES=['Carlos','Ana','Luis','María','Jorge','Paula','Andrés','Laura','Camilo','Sandra','Julián','Diana','Mateo','Natalia'];
 const APE=['Rojas','Gómez','Pérez','Martínez','Ramírez','Castro','Torres','Vargas','Moreno','Cárdenas','Londoño','Ortiz'];
 const PROV=['Surtiandes','Mayoristas del Centro','Proveedora Nacional','Importaciones Cafetero','Logística y Suministros','Comercial Tolima','Grupo Mercantil','Distribuciones Pijao'];
 function genBase(code){
@@ -101,60 +115,71 @@ function genBase(code){
   const n=ri(r,800000000,901999999);
   const empresa={nombre:pick(r,['Distribuidora','Comercializadora','Inversiones','Suministros','Importadora'])+' '+pick(r,['Combeima','Los Nevados','Cumbre','Pijao','Andina','Cóndor','Magdalena','del Tolima'])+' S.A.S.',nit:nit(n),actividad:cat[0],dir:'Cra '+ri(r,1,15)+' # '+ri(r,1,99)+'-'+ri(r,1,99)+', Ibagué',tel:'3'+ri(r,10,25)+' '+ri(r,100,999)+' '+ri(r,1000,9999)};
   const ter=[];
-  take(r,NOM,5).forEach((nm,i)=>{const nat=i<3;const doc=nat?String(ri(r,10000000,79999999)):String(ri(r,800000000,901999999));
+  take(r,NOMBRES,5).forEach((nm,i)=>{const nat=i<3;const doc=nat?String(ri(r,10000000,79999999)):String(ri(r,800000000,901999999));
     ter.push({id:'T'+(i+1),tipo:'cliente',nombre:nat?nm+' '+pick(r,APE)+' '+pick(r,APE):pick(r,['Restaurante','Colegio','Taller','Clínica','Hotel'])+' '+pick(r,['El Mirador','San José','La Pradera','Santa Lucía','Los Andes'])+' S.A.S.',tipoDoc:nat?'CC':'NIT',doc:nat?dots(doc):nit(doc),dir:'Calle '+ri(r,1,60)+' # '+ri(r,1,40)+'-'+ri(r,1,99)+', Ibagué',tel:'3'+ri(r,10,25)+' '+ri(r,100,999)+' '+ri(r,1000,9999)})});
   take(r,PROV,4).forEach((nm,i)=>{const d=ri(r,800000000,901999999);ter.push({id:'T'+(i+6),tipo:'proveedor',nombre:nm+' S.A.S.',tipoDoc:'NIT',doc:nit(d),dir:'Av. '+ri(r,1,30)+' # '+ri(r,1,80)+'-'+ri(r,1,99)+', Bogotá',tel:'60'+ri(r,1,8)+' '+ri(r,100,999)+' '+ri(r,1000,9999)})});
-  const prods=cat[1].map((p,i)=>{const costo=r100(p[1]*(0.9+r()*0.25));return{id:'P'+(i+1),cod:String(i+1).padStart(3,'0'),nombre:p[0],costo,precio:r100(costo*(1.25+r()*0.2)),iva:19}});
-  const caja=ri(r,15,25)*100000,banco=ri(r,300,450)*100000;
+  const prods=cat[1].map((p,i)=>{const costo=r100(p[1]*(0.9+r()*0.25));return{id:'P'+(i+1),cod:String(i+1).padStart(3,'0'),nombre:p[0],costo,precio:r100(costo*(1.45+r()*0.2)),iva:19}});
+  const caja=ri(r,15,25)*100000,banco=ri(r,900,1200)*100000;
   const ini={id:'ini',ini:true,tipo:'CC',num:'CC-1',seq:1,fecha:PERIODO+'-01',concepto:'Saldo inicial de la empresa',lines:[{c:'110505',d:caja,h:0},{c:'111005',d:banco,h:0},{c:'310505',d:0,h:caja+banco}]};
-  return{empresa,terceros:ter,productos:prods,ini};
+  const re=R(H('em'+code)),fn=pick(re,['Laura','Camila','Andrés','Juan','Paola','Diego','Natalia','Sebastián','Valentina','Carlos']),ln1=pick(re,['Rodríguez','Gómez','Martínez','López','Ramírez','Torres','Herrera','Castro']),ln2=pick(re,['Vargas','Rojas','Londoño','Cárdenas','Moreno','Ortiz','Salazar','Pineda']);
+  const empleados=[{id:'E1',doc:String(ri(re,10000000,1099999999)),nombre:fn+' '+ln1+' '+ln2,cargo:pick(re,['Auxiliar administrativo','Vendedor de mostrador','Auxiliar de bodega','Asistente contable']),salario:pick(re,[1750905,1900000,2000000,2100000,2200000]),ingreso:PERIODO.slice(0,4)+'-01-15'}];
+  return{empresa,terceros:ter,productos:prods,ini,empleados};
 }
 function genPack(code,b){
   const r=R(H('pk'+code)),d=n=>PERIODO+'-'+String(n).padStart(2,'0'),P=b.productos;
-  const mu=c=>c<5000?10:c<20000?4:c<60000?2:1;
-  const it=(i,qty,cost)=>({p:P[i].id,qty:qty*mu(P[i].costo),precio:cost?P[i].costo:P[i].precio,desc:0,iva:P[i].iva});
+  const mu=c=>3*(c<5000?10:c<20000?4:c<60000?2:1);
+  const it=(i,qty,f)=>({p:P[i].id,qty:qty*mu(P[i].costo),precio:f?r100(P[i].costo*f):P[i].precio,desc:0,iva:P[i].iva});
   const raw=(i,qty,cost)=>({p:P[i].id,qty,precio:cost?P[i].costo:P[i].precio,desc:0,iva:P[i].iva});
-  const L=[];
-  [[[0,1,2],'T6','credito',2],[[3,4],'T7','contado',4],[[5,6,7],'T8','credito',6]].forEach(g=>{
-    L.push({tipo:'FC',fecha:d(g[3]),ter:g[1],pago:g[2],medio:'banco',dias:30,numProv:'FE-'+ri(r,1000,9999),items:g[0].map(i=>it(i,ri(r,20,40),true))})});
-  const c3x=L[2];c3x.rete={c:'236540',pct:2.5};
-  [[[0,2],'T1','contado','caja',8],[[1,3,4],'T2','credito','banco',10],[[5,6],'T3','credito','banco',12],[[7,1],'T4','contado','banco',14]].forEach(g=>{
-    L.push({tipo:'FV',fecha:d(g[4]),ter:g[1],pago:g[2],medio:g[3],dias:30,items:g[0].map(i=>it(i,ri(r,4,8),false))})});
-  const tot=x=>docCalc(x).total;
-  const v2=L.find(x=>x.tipo==='FV'&&x.ter==='T2'),v3=L.find(x=>x.tipo==='FV'&&x.ter==='T3'),c1=L.find(x=>x.tipo==='FC'&&x.ter==='T6'),c3=L.find(x=>x.tipo==='FC'&&x.ter==='T8');
-  L.push({tipo:'RC',fecha:d(20),ter:'T2',valor:tot(v2),medio:'banco',concepto:'Pago total de la venta del '+d(10)});
-  L.push({tipo:'RC',fecha:d(21),ter:'T3',valor:Math.round(tot(v3)/2),medio:'banco',concepto:'Abono del 50% de la venta del '+d(12)});
-  L.push({tipo:'CE',fecha:d(22),ter:'T6',valor:Math.round(tot(c1)/2),medio:'banco',concepto:'Abono del 50% a la factura '+c1.numProv});
-  L.push({tipo:'CE',fecha:d(25),ter:'T8',valor:tot(c3)-retAmt(c3,docCalc(c3).base),medio:'banco',concepto:'Pago total de la factura '+c3.numProv+' (ya descontada la retención)',pend:true});
-  // fase 2
+  const tot=x=>docCalc(x).total,L=[];
+  const fc=(dia,ter,pago,dias,idx,f)=>({tipo:'FC',fecha:d(dia),ter,pago,medio:'banco',dias,numProv:'FE-'+ri(r,1000,9999),items:idx.map((i,k)=>it(i,ri(r,20,40),f?f[k]:1))});
+  const c1=fc(2,'T6','credito',30,[0,1,2]),c2=fc(4,'T7','contado',30,[3,4]),c3=fc(6,'T8','credito',30,[5,6,7]),c4=fc(9,'T9','contado',30,[0,3,5],[1.04,1.03,1.05]),c5=fc(13,'T6','credito',45,[1,4,7],[1.05,1.04,1.03]);
+  c3.rete={c:'236540',pct:2.5};L.push(c1,c2,c3,c4,c5);
+  const fv=(dia,ter,pago,medio,idx)=>({tipo:'FV',fecha:d(dia),ter,pago,medio,dias:30,items:idx.map(i=>it(i,ri(r,6,10),0))});
+  const v1=fv(8,'T1','contado','caja',[0,2]),v2=fv(10,'T2','credito','banco',[1,3,4]),v3=fv(12,'T3','credito','banco',[5,6]),v4=fv(14,'T4','contado','banco',[7,1]),v5=fv(17,'T1','credito','banco',[0,2]);
+  L.push(v1,v2,v3,v4,v5);
+  const fvz={tipo:'FV',fecha:d(18),ter:'T5',pago:'credito',medio:'banco',dias:30,hide:true,items:[raw(5,3,false),raw(6,2,false)]};
+  L.push({tipo:'CZ',fecha:d(15),ter:'T5',items:[raw(5,3,false),raw(6,2,false)]},fvz);
   L.push({tipo:'NV',fecha:d(16),ter:'T1',pago:'contado',medio:'caja',items:[raw(0,1,false)]});
   L.push({tipo:'NP',fecha:d(17),ter:'T7',pago:'contado',medio:'banco',items:[raw(3,2,true)]});
-  L.push({tipo:'CZ',fecha:d(15),ter:'T5',items:[raw(5,3,false),raw(6,2,false)]});
-  L.push({tipo:'FV',fecha:d(18),ter:'T5',pago:'credito',medio:'banco',dias:30,hide:true,items:[raw(5,3,false),raw(6,2,false)]});
   const arr=ri(r,3,6)*100000,luz=ri(r,80,200)*1000,fee=ri(r,8,15)*1000;
+  const ga=(dia,ter,cuenta,base,iva,pago,medio,conc)=>({tipo:'GA',fecha:d(dia),ter,cuenta,base,ivaPct:iva,pago,medio,dias:30,concepto:conc});
+  const gaLuz=ga(28,'T9','513530',luz,0,'credito','banco','Servicio de energía eléctrica del mes');
+  L.push(ga(11,'T7','513525',ri(r,40,90)*1000,0,'contado','banco','Servicio de acueducto y alcantarillado del mes'),ga(15,'T8','513535',ri(r,60,120)*1000,19,'contado','banco','Servicio de telefonía e internet del mes'),ga(20,'T6','519595',ri(r,30,70)*1000,19,'contado','caja','Útiles de aseo y cafetería'),ga(23,'T7','519595',ri(r,100,200)*1000,19,'credito','banco','Mantenimiento de equipos y del local'),gaLuz);
   L.push({tipo:'CC',fecha:d(5),concepto:'Pago del arriendo del local (transferencia bancaria)',lines:[{c:'512010',d:arr,h:0},{c:'111005',d:0,h:arr}],nota:'Arrendamientos / Bancos'});
-  L.push({tipo:'GA',fecha:d(28),ter:'T9',cuenta:'513530',base:luz,ivaPct:0,pago:'credito',dias:30,concepto:'Servicio de energía eléctrica del mes'});
   L.push({tipo:'CC',fecha:d(30),concepto:'Cuota de manejo de la cuenta bancaria (nota débito del banco)',lines:[{c:'530505',d:fee,h:0},{c:'111005',d:0,h:fee}],nota:'Gastos bancarios / Bancos'});
+  const rc=(dia,ter,val,conc)=>({tipo:'RC',fecha:d(dia),ter,valor:val,medio:'banco',concepto:conc});
+  L.push(rc(20,'T2',tot(v2),'Pago total de la venta del '+d(10)),rc(21,'T3',Math.round(tot(v3)/2),'Abono del 50% de la venta del '+d(12)),rc(24,'T5',Math.round(tot(fvz)*0.4),'Abono del 40% de la venta del '+d(18)),rc(26,'T1',tot(v5),'Pago total de la venta del '+d(17)),rc(28,'T3',tot(v3)-Math.round(tot(v3)/2),'Saldo de la venta del '+d(12)));
+  const ce=(dia,ter,val,conc,pend)=>({tipo:'CE',fecha:d(dia),ter,valor:val,medio:'banco',concepto:conc,pend});
+  L.push(ce(22,'T6',Math.round(tot(c1)/2),'Abono del 50% a la factura '+c1.numProv),ce(25,'T8',tot(c3)-retAmt(c3,docCalc(c3).base),'Pago total de la factura '+c3.numProv+' (ya descontada la retención)',true),ce(27,'T6',Math.round(tot(c5)*0.3),'Abono del 30% a la factura '+c5.numProv),ce(29,'T9',tot(gaLuz),'Pago de la factura de energía del '+d(28)),ce(30,'T6',tot(c1)-Math.round(tot(c1)/2),'Saldo de la factura '+c1.numProv));
+  const pc=ri(r,25,40)*100000,mue=ri(r,8,15)*100000,imp=ri(r,8,12)*100000,k3=n=>Math.round(n/1000)*1000;
+  L.push({tipo:'AF',fecha:d(3),ter:'T7',cat:'co',nombre:'Computador portátil',base:pc,ivaPct:19,vida:60,resid:0,pago:'contado',medio:'banco',dias:30,numProv:'FE-'+ri(r,1000,9999)});
+  const prn={tipo:'AF',fecha:d(4),ter:'T7',cat:'co',nombre:'Impresora multifuncional',base:imp,ivaPct:19,vida:60,resid:0,pago:'contado',medio:'banco',dias:30,numProv:'FE-'+ri(r,1000,9999)};L.push(prn);
+  L.push({tipo:'AF',fecha:d(6),ter:'T6',cat:'of',nombre:'Escritorio y silla ejecutiva',base:mue,ivaPct:19,vida:120,resid:k3(mue*0.1),pago:'credito',medio:'banco',dias:30,numProv:'FE-'+ri(r,1000,9999)});
+  const bav={tipo:'BA',fecha:d(26),valor:k3(imp*0.92),medio:'banco',nombre:'Impresora multifuncional'};L.push(bav);
+  L.push({tipo:'DP',fecha:d(30)});
+  const no={tipo:'NO',fecha:d(30),exon:true,emps:b.empleados.map(e=>({id:e.id,nombre:e.nombre,salario:e.salario}))},pn={tipo:'PN',fecha:d(30),medio:'banco'};L.push(no,pn);
+  L.filter(x=>x.tipo==='AF').forEach(x=>x.cuenta=ACT[x.cat].a);
   const cn={};
   L.forEach((x,i)=>{x.id='k'+i;x.seq=10+i;cn[x.tipo]=(cn[x.tipo]||(x.tipo==='CC'?1:0))+1;x.num=x.tipo+'-'+cn[x.tipo]});
+  bav.activo=prn.id;bav.concepto='Venta de '+prn.nombre;pn.nom=no.id;pn.valor=nomCalc(no.emps,true).tot.neto;no.concepto='Nómina de '+no.fecha.slice(0,7);pn.concepto='Pago de la nómina de '+no.fecha.slice(0,7);
   return L;
 }
 function extractoData(base,pack){
   const all=[base.ini,...pack],r=derive(all,base.productos),pend=pack.find(x=>x.pend);
   const rows=r.J.filter(x=>x.c==='111005'&&!(pend&&x.d.id===pend.id)).sort((a,b)=>a.fecha.localeCompare(b.fecha));let s=0;
-  const lab=x=>x.d.ini?'Saldo inicial':x.d.tipo==='RC'?'Transferencia recibida':x.d.tipo==='FV'?'Consignación por venta':x.d.tipo==='FC'?'Pago a proveedor':x.d.tipo==='NP'?'Reintegro de proveedor':x.d.tipo==='CE'?'Transferencia a proveedor':x.d.tipo==='CC'&&x.d.concepto.indexOf('Cuota')===0?'Cuota de manejo':'Pago de arriendo';
+  const lab=x=>x.d.ini?'Saldo inicial':x.d.tipo==='RC'?'Transferencia recibida':x.d.tipo==='FV'?'Consignación por venta':x.d.tipo==='FC'?'Pago a proveedor':x.d.tipo==='NP'?'Reintegro de proveedor':x.d.tipo==='CE'?'Transferencia a proveedor':x.d.tipo==='PN'?'Pago de nómina (transferencias)':x.d.tipo==='GA'?'Pago de servicios':x.d.tipo==='AF'?'Pago de activo fijo':x.d.tipo==='BA'?'Consignación por venta de activo':x.d.tipo==='CC'&&x.d.concepto.indexOf('Cuota')===0?'Cuota de manejo':'Pago de arriendo';
   return rows.map(x=>{s+=x.de-x.ha;return{f:x.fecha,t:lab(x),de:x.de,ha:x.ha,s}})}
 /* ---------- Contabilidad ---------- */
 const retAmt=(d,base)=>d.rete?Math.round(base*d.rete.pct/100):0;
 const addDays=(f,n)=>{const x=new Date(f+'T12:00:00');x.setDate(x.getDate()+(+n||0));return x.toISOString().slice(0,10)};
 function docCalc(d){
-  if(d.tipo==='GA'){const base=Math.round(+d.base||0),iva=Math.round(base*(d.ivaPct||0)/100);return{base,iva,total:base+iva}}
+  if(d.tipo==='GA'||d.tipo==='AF'){const base=Math.round(+d.base||0),iva=Math.round(base*(d.ivaPct||0)/100);return{base,iva,total:base+iva}}
   let base=0,iva=0;(d.items||[]).forEach(it=>{const b=it.qty*it.precio*(1-(it.desc||0)/100);base+=b;iva+=b*(it.iva/100)});base=Math.round(base);iva=Math.round(iva);return{base,iva,total:base+iva}}
-function docTotal(d){if(d.items||d.tipo==='GA')return docCalc(d).total;if(d.tipo==='CC')return d.lines.reduce((s,l)=>s+(+l.d||0),0);return +d.valor||0}
+function docTotal(d){if(d.tipo==='NO')return nomCalc(d.emps,d.exon).tot.dev;if(d.items||d.tipo==='GA'||d.tipo==='AF')return docCalc(d).total;if(d.tipo==='CC')return d.lines.reduce((s,l)=>s+(+l.d||0),0);return +d.valor||0}
 function derive(docs,prods){
   const names={};(prods||[]).forEach(p=>names[p.id]=p.nombre);
   const sorted=[...docs].sort((a,b)=>a.fecha.localeCompare(b.fecha)||a.seq-b.seq);
-  const J=[],K={},W={},st={};
+  const J=[],K={},W={},st={},A=[],Am={},meses={},Nm={};
   const ln=(d,c,de,ha,ter,ven)=>{if(Math.round(de)||Math.round(ha))J.push({d,fecha:d.fecha,c,de:Math.round(de),ha:Math.round(ha),ter,ven})};
   const caja=m=>m==='banco'?'111005':'110505';
   const S0=p=>st[p]||(st[p]={q:0,c:0});
@@ -180,16 +205,31 @@ function derive(docs,prods){
     else if(d.tipo==='GA'){const c=docCalc(d),rt=retAmt(d,c.base);
       ln(d,d.cuenta,c.base,0);ln(d,'240802',c.iva,0);if(rt)ln(d,d.rete.c,0,rt);
       if(d.pago==='credito')ln(d,'220505',0,c.total-rt,d.ter,addDays(d.fecha,d.dias||30));else ln(d,caja(d.medio),0,c.total-rt)}
+    else if(d.tipo==='NO'){const c=nomCalc(d.emps,d.exon);Nm[d.id]={neto:c.tot.neto,fecha:d.fecha,pagada:false};c.lines.forEach(x=>ln(d,x[0],x[1],x[2]))}
+    else if(d.tipo==='PN'){const n=Nm[d.nom];if(!n)W[d.id]='La liquidación de nómina no existe o su fecha es posterior';else if(n.pagada)W[d.id]='Esta nómina ya fue pagada';else{n.pagada=true;ln(d,'250505',n.neto,0);ln(d,caja(d.medio),0,n.neto)}}
+    else if(d.tipo==='AF'){const c=docCalc(d),k=ACT[d.cat]||ACT.of;
+      const a={id:d.id,doc:d.num,nombre:d.nombre,cat:d.cat,cuenta:d.cuenta,ac:k.ac,g:k.g,fecha:d.fecha,costo:c.base,vida:d.vida,resid:d.resid||0,acum:0,n:0,baja:null};A.push(a);Am[d.id]=a;
+      ln(d,d.cuenta,c.base,0);ln(d,'240802',c.iva,0);if(d.pago==='credito')ln(d,'220505',0,c.total,d.ter,addDays(d.fecha,d.dias||30));else ln(d,caja(d.medio),0,c.total)}
+    else if(d.tipo==='DP'){const mk=d.fecha.slice(0,7);
+      if(meses[mk])W[d.id]='Ya existe una depreciación de este mes';
+      else{meses[mk]=1;let n=0;const g={};
+        A.forEach(a=>{if(a.baja||a.fecha.slice(0,7)>mk||a.n>=a.vida)return;let q=Math.round((a.costo-a.resid)/a.vida);q=Math.min(q,a.costo-a.resid-a.acum);if(q<=0)return;a.acum+=q;a.n++;n++;const kk=a.g+'|'+a.ac;g[kk]=(g[kk]||0)+q});
+        Object.keys(g).sort().forEach(kk=>{const p=kk.split('|');ln(d,p[0],g[kk],0)});Object.keys(g).sort().forEach(kk=>{const p=kk.split('|');ln(d,p[1],0,g[kk])});
+        if(!n)W[d.id]='No hay activos por depreciar en este mes (se deprecia desde el mes de la compra)'}}
+    else if(d.tipo==='BA'){const a=Am[d.activo];
+      if(!a)W[d.id]='El activo ya no existe';else if(a.baja)W[d.id]='Este activo ya fue dado de baja';else if(a.fecha>d.fecha)W[d.id]='La fecha es anterior a la compra del activo';
+      else{const v=Math.round(+d.valor||0),lib=a.costo-a.acum,df=v-lib;
+        ln(d,a.ac,a.acum,0);if(v)ln(d,caja(d.medio),v,0);if(df<0)ln(d,'531005',-df,0);ln(d,a.cuenta,0,a.costo);if(df>0)ln(d,'424505',0,df);a.baja=d.id;a.bajaF=d.fecha;a.venta=v}}
     else if(d.tipo==='RC'){ln(d,caja(d.medio),d.valor,0);ln(d,'130505',0,d.valor,d.ter)}
     else if(d.tipo==='CE'){ln(d,'220505',d.valor,0,d.ter);ln(d,caja(d.medio),0,d.valor)}
     else if(d.tipo==='CC'){d.lines.forEach(l=>ln(d,l.c,+l.d||0,+l.h||0,l.ter))}
   });
-  return{J,K,W,st,sorted};
+  return{J,K,W,st,sorted,A};
 }
 const bal=(J,pre)=>J.filter(x=>x.c.startsWith(pre)).reduce((s,x)=>s+x.de-x.ha,0);
 function kpis(J,st,prods){let inv=0;prods.forEach(p=>{const s=st[p.id];if(s)inv+=s.q*s.c});
-  const ventas=-bal(J,'4'),cv=bal(J,'6'),gas=bal(J,'5');
-  return{ventas,costoVentas:cv,gastos:gas,utilidad:ventas-cv-gas,bancos:bal(J,'111005'),caja:bal(J,'110505'),clientes:bal(J,'130505'),proveedores:-bal(J,'220505'),inventario:bal(J,'143505'),ivaPagar:-(bal(J,'240801')+bal(J,'240802'))}}
+  const ventas=-bal(J,'41'),cv=bal(J,'6'),gas=bal(J,'5');
+  return{ventas,costoVentas:cv,gastos:gas,utilidad:-bal(J,'4')-cv-gas,bancos:bal(J,'111005'),caja:bal(J,'110505'),clientes:bal(J,'130505'),proveedores:-bal(J,'220505'),inventario:bal(J,'143505'),ivaPagar:-(bal(J,'240801')+bal(J,'240802'))}}
 
 
 function paperItems(d,base,ret){const c=docCalc(d),rt=ret?retAmt(d,c.base):0;return `<table><tr><th>Descripción</th><th class="r">Cant.</th><th class="r">Vr. unitario</th><th class="r">IVA</th><th class="r">Total</th></tr>${d.items.map(i=>{const p=base.productos.find(x=>x.id===i.p);return`<tr><td>${esc(p.nombre)}</td><td class="r">${i.qty}</td><td class="r">${fmt(i.precio)}</td><td class="r">${i.iva}%</td><td class="r">${fmt(i.qty*i.precio)}</td></tr>`}).join('')}<tr><td colspan=4 class="r">Subtotal</td><td class="r">${fmt(c.base)}</td></tr><tr><td colspan=4 class="r">IVA</td><td class="r">${fmt(c.iva)}</td></tr><tr><td colspan=4 class="r"><b>TOTAL</b></td><td class="r"><b>${fmt(c.total)}</b></td></tr>${rt?`<tr><td colspan=5 class="r">Esta empresa practica retención en la fuente del ${d.rete.pct}% sobre la base: ${fmt(rt)} (valor neto a pagar: ${fmt(c.total-rt)})</td></tr>`:''}</table>`}
@@ -200,6 +240,11 @@ function paperHTML(d,base,st){
   const end=(m,x)=>`<div class="todo">▶ Registrar en: <b>${m}</b>${x?' · '+x:''} ${badge}</div><div class="wm">PAMAVA Soluciones</div></div>`;
   const prov=`<b>${esc(tr.nombre)}</b><br>NIT ${tr.doc}<br>${esc(tr.dir)} · Tel ${esc(tr.tel)}`,yo=`<b>${esc(e.nombre)}</b><br>NIT ${e.nit}`;
   const cli=`Cliente: <b>${esc(tr.nombre)}</b> · ${tr.tipoDoc} ${tr.doc}`;
+  if(d.tipo==='AF'){const c=docCalc(d),k=ACT[d.cat];return hd(prov,`<div class="pt">FACTURA DE VENTA</div>No. <b>${d.numProv}</b><br>Fecha: ${d.fecha}`)+`Señores: <b>${esc(e.nombre)}</b> · NIT ${e.nit}<br>Forma de pago: <b>${pay}</b>${d.pago==='contado'?' · Pagado desde Bancos':''}<table><tr><th>Descripción</th><th class="r">Valor</th><th class="r">IVA</th><th class="r">Total</th></tr><tr><td>${esc(d.nombre)}</td><td class="r">${fmt(c.base)}</td><td class="r">${fmt(c.iva)}</td><td class="r"><b>${fmt(c.total)}</b></td></tr></table>`+end('Compra de activo fijo','tipo: '+k.n+' · vida útil: '+d.vida+' meses · valor residual: '+fmt(d.resid||0))}
+  if(d.tipo==='NO'){const c=nomCalc(d.emps,d.exon);return hd(yo,`<div class="pt">ORDEN DE LIQUIDACIÓN DE NÓMINA</div>Fecha: ${d.fecha}`)+`Liquidar la nómina del mes de noviembre con 30 días trabajados. La empresa está exonerada de salud, SENA e ICBF (Art. 114-1 E.T.).<table><tr><th>Empleado</th><th class="r">Salario mensual</th><th class="r">Días</th></tr>${c.rows.map(x=>`<tr><td>${esc(x.nombre)}</td><td class="r">${fmt(x.sal)}</td><td class="r">30</td></tr>`).join('')}</table>`+end('Liquidación de nómina','el simulador calcula todo; compara con tu cálculo a mano')}
+  if(d.tipo==='PN')return hd(yo,`<div class="pt">COMPROBANTE DE PAGO DE NÓMINA</div>Fecha: ${d.fecha}`)+`La empresa consignó por Bancos el neto de la nómina de noviembre: <b>${fmt(d.valor)}</b>.`+end('Pago de nómina','elige la liquidación de noviembre y el medio de pago');
+  if(d.tipo==='BA')return hd(yo,`<div class="pt">CONTRATO DE VENTA DE ACTIVO</div>Fecha: ${d.fecha}`)+`La empresa vende el activo <b>${esc(d.nombre)}</b> a un comprador particular por <b>${fmt(d.valor)}</b>. El pago se recibió en Bancos.`+end('Baja o venta de activos','elige el activo y escribe el valor de venta; el simulador calcula la utilidad o pérdida');
+  if(d.tipo==='DP')return hd(yo,`<div class="pt">ORDEN DE CIERRE MENSUAL</div>Fecha: ${d.fecha}`)+`Causar la depreciación de <b>todos los activos fijos</b> del mes de noviembre, con el método de línea recta: (costo − valor residual) ÷ vida útil en meses. Un activo vendido ya no se deprecia.`+end('Depreciación mensual','fecha 30 de noviembre; revisa la vista previa y guarda');
   if(d.tipo==='FC')return hd(prov,`<div class="pt">FACTURA DE VENTA</div>No. <b>${d.numProv}</b><br>Fecha: ${d.fecha}`)+`Señores: <b>${esc(e.nombre)}</b> · NIT ${e.nit}<br>Forma de pago: <b>${pay}</b>${paperItems(d,base,true)}`+end('Facturas de compra',d.rete?'campo Retención: elige la opción de '+d.rete.pct+'%':'');
   if(d.tipo==='FV')return hd(yo,`<div class="pt">PEDIDO DE VENTA</div>Fecha: ${d.fecha}`)+`${cli}<br>Forma de pago: <b>${pay}</b>${d.pago==='contado'?' · Recibido en '+(d.medio==='banco'?'Bancos':'Caja general'):''}${paperItems(d,base)}`+end('Facturas de venta');
   if(d.tipo==='CZ')return hd(yo,`<div class="pt">COTIZACIÓN</div>Fecha: ${d.fecha}`)+`Para: <b>${esc(tr.nombre)}</b> · ${tr.tipoDoc} ${tr.doc}<br>El cliente aceptó esta cotización.${paperItems(d,base)}`+end('Cotizaciones','luego pulsa «Facturar» y conviértela en factura de venta a crédito de 30 días');
@@ -224,18 +269,19 @@ function packHTML(n,name){
   const code=EMPC[n-1],base=genBase(code),pk=genPack(code,base),e=base.empresa,ini=base.ini;
   const who=name?esc(name):'Empresa '+n;
   const sec=(k,t,body,donde)=>`<div class="paper"><div class="ph"><div class="pt">${k}. ${t}</div><div style="text-align:right">Empresa ${n} · ${who}</div></div>${body}<div class="todo">▶ ${donde}</div><div class="wm">PAMAVA Soluciones</div></div>`;
-  const head=`<div class="card"><h2 style="margin:0;color:#12365f">PAMAVA · Simulador contable — Hojas de práctica</h2>Estudiante: ${name?'<b>'+esc(name)+'</b>':'______________________________________'}<br><span style="font-size:17px"><b>Empresa ${n}</b> · Contraseña para entrar al simulador: <b style="font-size:20px;letter-spacing:3px">${PASS[n-1]}</b></span><br>Período: ${PERIODO} · IVA 19%<div class="note">En el simulador escribe tu nombre completo y esta contraseña. El simulador empieza en blanco: con estas hojas montas tu empresa, primero los pasos 1 a 4 y luego los documentos del mes, en el orden en que aparecen.</div></div>`;
+  const head=`<div class="card"><h2 style="margin:0;color:#12365f">PAMAVA · Simulador contable — Hojas de práctica</h2>Estudiante: ${name?'<b>'+esc(name)+'</b>':'______________________________________'}<br><span style="font-size:17px"><b>Empresa ${n}</b> · Contraseña para entrar al simulador: <b style="font-size:20px;letter-spacing:3px">${PASS[n-1]}</b></span><br>Período: ${PERIODO} · IVA 19%<div class="note">En el simulador escribe tu nombre completo y esta contraseña. El simulador empieza en blanco: con estas hojas montas tu empresa, primero los pasos 1 a 5 y luego los documentos del mes, en el orden en que aparecen.</div></div>`;
   const s1=sec(1,'Datos de la empresa',`<table><tr><th>Dato</th><th>Valor</th></tr><tr><td>Razón social</td><td><b>${esc(e.nombre)}</b></td></tr><tr><td>NIT</td><td>${e.nit}</td></tr><tr><td>Actividad</td><td>${esc(e.actividad)}</td></tr><tr><td>Dirección</td><td>${esc(e.dir)}</td></tr><tr><td>Teléfono</td><td>${esc(e.tel)}</td></tr></table>`,'Escribe estos datos en: <b>Configuración → Datos de la empresa</b>');
   const s2=sec(2,'Saldo inicial de la empresa',`<p>Fecha: <b>${ini.fecha}</b></p><table><tr><th>Cuenta</th><th>Nombre</th><th class="r">Débito</th><th class="r">Crédito</th></tr>${ini.lines.map(l=>`<tr><td>${l.c}</td><td>${PUC[l.c]}</td><td class="r">${l.d?fmt(l.d):''}</td><td class="r">${l.h?fmt(l.h):''}</td></tr>`).join('')}</table>`,'Regístralo en: <b>Comprobantes contables → Crear comprobante contable</b> (concepto: Saldo inicial)');
   const tl=t=>base.terceros.filter(x=>x.tipo===t).map(x=>`<tr><td>${x.tipoDoc} ${x.doc}</td><td>${esc(x.nombre)}</td><td>${esc(x.dir)}</td><td>${esc(x.tel)}</td></tr>`).join('');
   const s3=sec(3,'Clientes y proveedores',`<b>Clientes</b><table><tr><th>Documento</th><th>Nombre</th><th>Dirección</th><th>Teléfono</th></tr>${tl('cliente')}</table><b>Proveedores</b><table><tr><th>Documento</th><th>Nombre</th><th>Dirección</th><th>Teléfono</th></tr>${tl('proveedor')}</table>`,'Créalos en: <b>Terceros → + Nuevo tercero</b> (cada uno en su pestaña: clientes o proveedores)');
   const s4=sec(4,'Productos',`<table><tr><th>Código</th><th>Producto</th><th class="r">Costo</th><th class="r">Precio de venta</th><th class="r">IVA</th></tr>${base.productos.map(p=>`<tr><td>${p.cod}</td><td>${esc(p.nombre)}</td><td class="r">${fmt(p.costo)}</td><td class="r">${fmt(p.precio)}</td><td class="r">${p.iva}%</td></tr>`).join('')}</table>`,'Créalos en: <b>Inventario → + Nuevo producto</b>. Las existencias no se escriben: llegan con las facturas de compra.');
-  const order=['FC','FV','CZ','NV','NP','GA','RC','CE','CC'];
+  const s5=sec(5,'Empleados',`<table><tr><th>Cédula</th><th>Nombre</th><th>Cargo</th><th class="r">Salario mensual</th><th>Ingreso</th></tr>${base.empleados.map(e=>`<tr><td>${e.doc}</td><td>${esc(e.nombre)}</td><td>${esc(e.cargo)}</td><td class="r">${fmt(e.salario)}</td><td>${e.ingreso}</td></tr>`).join('')}</table>`,'Créalos en: <b>Empleados → + Nuevo empleado</b>');
+  const order=['FC','AF','FV','CZ','NV','NP','GA','RC','CE','CC','BA','DP','NO','PN'];
   const docs=order.flatMap(t=>pk.filter(x=>x.tipo===t&&!x.hide)).map(x=>paperHTML(x,base)).join('');
-  return `${head}${s1}${s2}${s3}${s4}<div style="page-break-before:always"><div class="card"><b>5. Documentos del mes</b> — registra cada uno en su módulo (compras primero, para que haya mercancía que vender).</div>${docs}${paperExtracto(base,pk)}</div>`}
+  return `${head}${s1}${s2}${s3}${s4}${s5}<div style="page-break-before:always"><div class="card"><b>6. Documentos del mes</b> — registra cada uno en su módulo (compras primero, para que haya mercancía que vender).</div>${docs}${paperExtracto(base,pk)}</div>`}
 function keyHTML(n){
   const b=genBase(EMPC[n-1]),pk=genPack(EMPC[n-1],b),r=derive([b.ini,...pk],b.productos),k=kpis(r.J,r.st,b.productos);
-  const rows=[['Ventas',k.ventas],['Costo de ventas',k.costoVentas],['Gastos',k.gastos],['Utilidad del período',k.utilidad],['Bancos',k.bancos],['Caja',k.caja],['Clientes por cobrar',k.clientes],['Proveedores por pagar',k.proveedores],['Inventario',k.inventario],['IVA por pagar (generado − descontable)',k.ivaPagar],['Saldo final del extracto bancario',(extractoData(b,pk).slice(-1)[0]||{s:0}).s]];
+  const rows=[['Ventas',k.ventas],['Costo de ventas',k.costoVentas],['Gastos',k.gastos],['Utilidad del período',k.utilidad],['Bancos',k.bancos],['Caja',k.caja],['Clientes por cobrar',k.clientes],['Proveedores por pagar',k.proveedores],['Inventario',k.inventario],['Activos fijos (valor en libros)',bal(r.J,'15')],['Gasto por depreciación del mes',bal(r.J,'516')],['Pérdida en venta de activos',bal(r.J,'531005')],['Costo total de la nómina (cuenta 5105)',bal(r.J,'5105')],['Neto pagado al empleado',r.J.filter(x=>x.c==='250505'&&x.de>0).reduce((s,x)=>s+x.de,0)],['Aportes y provisiones por pagar (2370, 2380, 25)',-(bal(r.J,'237')+bal(r.J,'238')+bal(r.J,'25'))],['IVA por pagar (generado − descontable)',k.ivaPagar],['Saldo final del extracto bancario',(extractoData(b,pk).slice(-1)[0]||{s:0}).s]];
   return `<div class="card" style="page-break-before:always"><b>Empresa ${n}</b> (contraseña ${PASS[n-1]}) — ${esc(b.empresa.nombre)}<table><tr><th>Concepto</th><th class="r">Resultado esperado</th></tr>${rows.map(a=>`<tr><td>${a[0]}</td><td class="r">${fmt(a[1])}</td></tr>`).join('')}</table></div>`}
 function listaHTML(){
   return `<div class="card"><h2 style="margin:0;color:#12365f">PAMAVA · Listado de empresas y contraseñas</h2><table><tr><th>N.º</th><th>Empresa</th><th>NIT</th><th>Actividad</th><th>Contraseña</th><th>Estudiante asignado</th></tr>${PASS.map((p,i)=>{const e=genBase(EMPC[i]).empresa;return`<tr><td>${i+1}</td><td>${esc(e.nombre)}</td><td>${e.nit}</td><td>${esc(e.actividad)}</td><td><b style="letter-spacing:2px">${p}</b></td><td style="min-width:170px">&nbsp;</td></tr>`}).join('')}</table></div>`}
