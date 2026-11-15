@@ -70,78 +70,14 @@ const today=()=>new Date().toISOString().slice(0,10);
 const normCode=s=>String(s||'').trim().toLowerCase().replace(/\s+/g,'');
 const mem={};
 const ls={get(k){try{const v=localStorage.getItem(k);return v==null?(mem[k]==null?null:mem[k]):v}catch(e){return mem[k]==null?null:mem[k]}},set(k,v){mem[k]=v;try{localStorage.setItem(k,v)}catch(e){}},del(k){delete mem[k];try{localStorage.removeItem(k)}catch(e){}}};
-const users=()=>{try{return JSON.parse(ls.get('pv_users')||'{}')}catch(e){return{}}};
+const users=()=>{try{return JSON.parse(ls.get('pv2_users')||'{}')}catch(e){return{}}};
 function toast(t){const e=$('#toast');e.textContent=t;e.style.display='block';clearTimeout(toast.t);toast.t=setTimeout(()=>e.style.display='none',2600)}
 
 /* ---------- PUC básico ---------- */
 const PUC={'110505':'Caja general','111005':'Bancos - moneda nacional','130505':'Clientes nacionales','135515':'Retención en la fuente a favor','143505':'Mercancías no fabricadas por la empresa','220505':'Proveedores nacionales','233595':'Otros costos y gastos por pagar','236515':'Retención en la fuente - honorarios','236525':'Retención en la fuente - servicios','236540':'Retención en la fuente - compras','240801':'IVA generado','240802':'IVA descontable','310505':'Capital social','413595':'Ingresos por venta de mercancías','512010':'Arrendamientos','513525':'Acueducto y alcantarillado','513530':'Energía eléctrica','513535':'Teléfono','519595':'Gastos diversos','530505':'Gastos bancarios','613595':'Costo de ventas de mercancías'};
 const TIPOS={CZ:'Cotización',FV:'Factura de venta',NV:'Nota crédito de venta',FC:'Factura de compra',NP:'Nota crédito de compra',GA:'Documento de gasto',RC:'Recibo de caja',CE:'Comprobante de egreso',CC:'Comprobante contable'};
 const PLUR={CZ:'Cotizaciones',FV:'Facturas de venta',NV:'Notas crédito de venta',FC:'Facturas de compra',NP:'Notas crédito de compra',GA:'Documentos de gasto',RC:'Recibos de caja',CE:'Comprobantes de egreso',CC:'Comprobantes contables'};
-const CONS0=()=>({CZ:1,FV:1,NV:1,FC:1,NP:1,GA:1,RC:1,CE:1,CC:2});
-/* ---------- Generador (determinista por código) ---------- */
-function H(s){let h=1779033703^s.length;for(let i=0;i<s.length;i++){h=Math.imul(h^s.charCodeAt(i),3432918353);h=h<<13|h>>>19}return h>>>0}
-function R(seed){let a=seed>>>0;return()=>{a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
-const ri=(r,a,b)=>Math.floor(r()*(b-a+1))+a;
-const pick=(r,a)=>a[Math.floor(r()*a.length)];
-const take=(r,a,n)=>{const c=[...a],o=[];while(o.length<n&&c.length)o.push(c.splice(Math.floor(r()*c.length),1)[0]);return o};
-const r100=n=>Math.round(n/100)*100;
-function dv(n){const w=[3,7,13,17,19,23,29,37,41,43,47,53,59,67,71],d=String(n).split('').reverse();let s=0;d.forEach((x,i)=>s+=x*w[i]);const m=s%11;return m>1?11-m:m}
-const dots=n=>String(n).replace(/\B(?=(\d{3})+(?!\d))/g,'.');
-const nit=n=>dots(n)+'-'+dv(n);
-const CATS={papeleria:['Papelería y útiles',[['Cuaderno cuadriculado 100 hojas',2800],['Resma papel carta 500 hojas',12500],['Lapicero azul (caja x12)',9000],['Marcadores borrables x4',7500],['Carpeta plástica con gancho',2200],['Tijeras escolares',3200],['Pegante en barra',1800],['Calculadora básica',16000]]],
-ferreteria:['Ferretería',[['Martillo de uña 16 oz',14000],['Destornillador de pala',6500],['Alicate universal',18000],['Cinta métrica 5 m',7500],['Tornillos (caja x100)',5500],['Cable eléctrico #12 (metro)',1900],['Bombillo LED 9W',4200],['Candado 40 mm',11000]]],
-tecnologia:['Tecnología',[['Mouse óptico USB',14000],['Teclado USB',28000],['Memoria USB 32 GB',21000],['Audífonos de diadema',32000],['Cable HDMI 2 m',12000],['Cargador universal',25000],['Disco duro externo 1 TB',210000],['Parlante bluetooth',48000]]]};
-const NOM=['Carlos','Ana','Luis','María','Jorge','Paula','Andrés','Laura','Camilo','Sandra','Julián','Diana','Mateo','Natalia'];
-const APE=['Rojas','Gómez','Pérez','Martínez','Ramírez','Castro','Torres','Vargas','Moreno','Cárdenas','Londoño','Ortiz'];
-const PROV=['Surtiandes','Mayoristas del Centro','Proveedora Nacional','Importaciones Cafetero','Logística y Suministros','Comercial Tolima','Grupo Mercantil','Distribuciones Pijao'];
-function genBase(code){
-  const r=R(H('cp'+code)),sec=pick(r,Object.keys(CATS)),cat=CATS[sec];
-  const n=ri(r,800000000,901999999);
-  const empresa={nombre:pick(r,['Distribuidora','Comercializadora','Inversiones','Suministros','Importadora'])+' '+pick(r,['Combeima','Los Nevados','Cumbre','Pijao','Andina','Cóndor','Magdalena','del Tolima'])+' S.A.S.',nit:nit(n),actividad:cat[0],dir:'Cra '+ri(r,1,15)+' # '+ri(r,1,99)+'-'+ri(r,1,99)+', Ibagué',tel:'3'+ri(r,10,25)+' '+ri(r,100,999)+' '+ri(r,1000,9999)};
-  const ter=[];
-  take(r,NOM,5).forEach((nm,i)=>{const nat=i<3;const doc=nat?String(ri(r,10000000,79999999)):String(ri(r,800000000,901999999));
-    ter.push({id:'T'+(i+1),tipo:'cliente',nombre:nat?nm+' '+pick(r,APE)+' '+pick(r,APE):pick(r,['Restaurante','Colegio','Taller','Clínica','Hotel'])+' '+pick(r,['El Mirador','San José','La Pradera','Santa Lucía','Los Andes'])+' S.A.S.',tipoDoc:nat?'CC':'NIT',doc:nat?dots(doc):nit(doc),dir:'Calle '+ri(r,1,60)+' # '+ri(r,1,40)+'-'+ri(r,1,99)+', Ibagué',tel:'3'+ri(r,10,25)+' '+ri(r,100,999)+' '+ri(r,1000,9999)})});
-  take(r,PROV,4).forEach((nm,i)=>{const d=ri(r,800000000,901999999);ter.push({id:'T'+(i+6),tipo:'proveedor',nombre:nm+' S.A.S.',tipoDoc:'NIT',doc:nit(d),dir:'Av. '+ri(r,1,30)+' # '+ri(r,1,80)+'-'+ri(r,1,99)+', Bogotá',tel:'60'+ri(r,1,8)+' '+ri(r,100,999)+' '+ri(r,1000,9999)})});
-  const prods=cat[1].map((p,i)=>{const costo=r100(p[1]*(0.9+r()*0.25));return{id:'P'+(i+1),cod:String(i+1).padStart(3,'0'),nombre:p[0],costo,precio:r100(costo*(1.25+r()*0.2)),iva:19}});
-  const caja=ri(r,15,25)*100000,banco=ri(r,300,450)*100000;
-  const ini={id:'ini',ini:true,tipo:'CC',num:'CC-1',seq:1,fecha:PERIODO+'-01',concepto:'Saldo inicial de la empresa',lines:[{c:'110505',d:caja,h:0},{c:'111005',d:banco,h:0},{c:'310505',d:0,h:caja+banco}]};
-  return{empresa,terceros:ter,productos:prods,ini};
-}
-function genPack(code,b){
-  const r=R(H('pk'+code)),d=n=>PERIODO+'-'+String(n).padStart(2,'0'),P=b.productos;
-  const mu=c=>c<5000?10:c<20000?4:c<60000?2:1;
-  const it=(i,qty,cost)=>({p:P[i].id,qty:qty*mu(P[i].costo),precio:cost?P[i].costo:P[i].precio,desc:0,iva:P[i].iva});
-  const raw=(i,qty,cost)=>({p:P[i].id,qty,precio:cost?P[i].costo:P[i].precio,desc:0,iva:P[i].iva});
-  const L=[];
-  [[[0,1,2],'T6','credito',2],[[3,4],'T7','contado',4],[[5,6,7],'T8','credito',6]].forEach(g=>{
-    L.push({tipo:'FC',fecha:d(g[3]),ter:g[1],pago:g[2],medio:'banco',dias:30,numProv:'FE-'+ri(r,1000,9999),items:g[0].map(i=>it(i,ri(r,20,40),true))})});
-  const c3x=L[2];c3x.rete={c:'236540',pct:2.5};
-  [[[0,2],'T1','contado','caja',8],[[1,3,4],'T2','credito','banco',10],[[5,6],'T3','credito','banco',12],[[7,1],'T4','contado','banco',14]].forEach(g=>{
-    L.push({tipo:'FV',fecha:d(g[4]),ter:g[1],pago:g[2],medio:g[3],dias:30,items:g[0].map(i=>it(i,ri(r,4,8),false))})});
-  const tot=x=>docCalc(x).total;
-  const v2=L.find(x=>x.tipo==='FV'&&x.ter==='T2'),v3=L.find(x=>x.tipo==='FV'&&x.ter==='T3'),c1=L.find(x=>x.tipo==='FC'&&x.ter==='T6'),c3=L.find(x=>x.tipo==='FC'&&x.ter==='T8');
-  L.push({tipo:'RC',fecha:d(20),ter:'T2',valor:tot(v2),medio:'banco',concepto:'Pago total de la venta del '+d(10)});
-  L.push({tipo:'RC',fecha:d(21),ter:'T3',valor:Math.round(tot(v3)/2),medio:'banco',concepto:'Abono del 50% de la venta del '+d(12)});
-  L.push({tipo:'CE',fecha:d(22),ter:'T6',valor:Math.round(tot(c1)/2),medio:'banco',concepto:'Abono del 50% a la factura '+c1.numProv});
-  L.push({tipo:'CE',fecha:d(25),ter:'T8',valor:tot(c3)-retAmt(c3,docCalc(c3).base),medio:'banco',concepto:'Pago total de la factura '+c3.numProv+' (ya descontada la retención)',pend:true});
-  // fase 2
-  L.push({tipo:'NV',fecha:d(16),ter:'T1',pago:'contado',medio:'caja',items:[raw(0,1,false)]});
-  L.push({tipo:'NP',fecha:d(17),ter:'T7',pago:'contado',medio:'banco',items:[raw(3,2,true)]});
-  L.push({tipo:'CZ',fecha:d(15),ter:'T5',items:[raw(5,3,false),raw(6,2,false)]});
-  L.push({tipo:'FV',fecha:d(18),ter:'T5',pago:'credito',medio:'banco',dias:30,hide:true,items:[raw(5,3,false),raw(6,2,false)]});
-  const arr=ri(r,3,6)*100000,luz=ri(r,80,200)*1000,fee=ri(r,8,15)*1000;
-  L.push({tipo:'CC',fecha:d(5),concepto:'Pago del arriendo del local (transferencia bancaria)',lines:[{c:'512010',d:arr,h:0},{c:'111005',d:0,h:arr}],nota:'Arrendamientos / Bancos'});
-  L.push({tipo:'GA',fecha:d(28),ter:'T9',cuenta:'513530',base:luz,ivaPct:0,pago:'credito',dias:30,concepto:'Servicio de energía eléctrica del mes'});
-  L.push({tipo:'CC',fecha:d(30),concepto:'Cuota de manejo de la cuenta bancaria (nota débito del banco)',lines:[{c:'530505',d:fee,h:0},{c:'111005',d:0,h:fee}],nota:'Gastos bancarios / Bancos'});
-  const cn={};
-  L.forEach((x,i)=>{x.id='k'+i;x.seq=10+i;cn[x.tipo]=(cn[x.tipo]||(x.tipo==='CC'?1:0))+1;x.num=x.tipo+'-'+cn[x.tipo]});
-  return L;
-}
-function extractoData(base,pack){
-  const all=[base.ini,...pack],r=derive(all,base.productos),pend=pack.find(x=>x.pend);
-  const rows=r.J.filter(x=>x.c==='111005'&&!(pend&&x.d.id===pend.id)).sort((a,b)=>a.fecha.localeCompare(b.fecha));let s=0;
-  const lab=x=>x.d.ini?'Saldo inicial':x.d.tipo==='RC'?'Transferencia recibida':x.d.tipo==='FV'?'Consignación por venta':x.d.tipo==='FC'?'Pago a proveedor':x.d.tipo==='NP'?'Reintegro de proveedor':x.d.tipo==='CE'?'Transferencia a proveedor':x.d.tipo==='CC'&&x.d.concepto.indexOf('Cuota')===0?'Cuota de manejo':'Pago de arriendo';
-  return rows.map(x=>{s+=x.de-x.ha;return{f:x.fecha,t:lab(x),de:x.de,ha:x.ha,s}})}
+const CONS0=()=>({CZ:1,FV:1,NV:1,FC:1,NP:1,GA:1,RC:1,CE:1,CC:1});
 /* ---------- Contabilidad ---------- */
 const retAmt=(d,base)=>d.rete?Math.round(base*d.rete.pct/100):0;
 const addDays=(f,n)=>{const x=new Date(f+'T12:00:00');x.setDate(x.getDate()+(+n||0));return x.toISOString().slice(0,10)};
@@ -191,15 +127,15 @@ function kpis(J,st,prods){let inv=0;prods.forEach(p=>{const s=st[p.id];if(s)inv+
 
 /* ---------- Estado ---------- */
 let U=null,S=null,view='inicio',rep='bp',repAcc='413595',tab='cliente',F=null,TP={txt:'',msg:''},teacher=false,teacherOK=false;
-function newState(code){const b=genBase(code);return{code,empresa:b.empresa,terceros:b.terceros,productos:b.productos,docs:[b.ini],cons:CONS0(),conc:{},extracto:0,seq:20}}
-function save(){ls.set('pv_d_'+U.code,JSON.stringify(S))}
+function newState(code){return{code,empresa:{nombre:'',nit:'',actividad:'',dir:'',tel:''},terceros:[],productos:[],docs:[],cons:CONS0(),conc:{},extracto:0,seq:20}}
+function save(){ls.set('pv2_d_'+U.code,JSON.stringify(S))}
 function login(){
   const name=$('#ln').value.trim(),code=normCode($('#lc').value);
   if(!name||!code)return toast('Escribe tu nombre y tu código');
   doLogin(name,code)}
 function doLogin(name,code){
-  const raw=ls.get('pv_d_'+code);try{S=raw?JSON.parse(raw):newState(code)}catch(e){S=newState(code)}
-  U={name,code};S.conc=S.conc||{};const us=users();us[code]={name,t:Date.now()};ls.set('pv_users',JSON.stringify(us));ls.set('pv_last',JSON.stringify({name,code}));
+  const raw=ls.get('pv2_d_'+code);try{S=raw?JSON.parse(raw):newState(code)}catch(e){S=newState(code)}
+  U={name,code};S.conc=S.conc||{};const us=users();us[code]={name,t:Date.now()};ls.set('pv2_users',JSON.stringify(us));ls.set('pv2_last',JSON.stringify({name,code}));
   save();view='inicio';teacher=false;render()}
 function logout(){U=null;S=null;teacher=false;teacherOK=false;render()}
 const ter=id=>S.terceros.find(t=>t.id===id)||{nombre:'—'};
@@ -212,15 +148,15 @@ function render(){
   const a=$('#app');
   if(teacher){a.innerHTML=teacherView();return}
   if(!U){a.innerHTML=loginView();return}
-  const nav=[['inicio','Inicio'],['terceros','Terceros'],['inventario','Inventario'],['CZ','Cotizaciones'],['FV','Facturas de venta'],['NV','Notas crédito de venta'],['FC','Facturas de compra'],['NP','Notas crédito de compra'],['GA','Documentos de gasto'],['RC','Recibos de caja'],['CE','Comprobantes de egreso'],['CC','Comprobantes contables'],['conc','Conciliación bancaria'],['reportes','Reportes'],['practica','Mi práctica'],['config','Configuración']];
-  const t={inicio:'Inicio',terceros:'Terceros',inventario:'Inventario',conc:'Conciliación bancaria',reportes:'Reportes',practica:'Mi práctica (documentos)',config:'Configuración'};
-  const body=view==='inicio'?vInicio():view==='terceros'?vTerceros():view==='inventario'?vInventario():TIPOS[view]?vDocs(view):view==='conc'?vConc():view==='reportes'?vReportes():view==='practica'?vPractica():vConfig();
-  a.innerHTML=`<div class="wrap"><div class="side"><h1>PAMAVA</h1><small>Simulador contable · PAMAVA Soluciones</small>${nav.map(n=>`${n[0]==='CZ'||n[0]==='conc'||n[0]==='practica'?'<hr>':''}<a class="${view===n[0]?'on':''}" onclick="go('${n[0]}')">${n[1]}</a>`).join('')}<hr><a onclick="logout()">Salir</a></div>
-  <div class="main"><div class="top"><div><h2>${TIPOS[view]?PLUR[view]:t[view]}</h2><div class="emp">${esc(S.empresa.nombre)} · NIT ${S.empresa.nit} · Estudiante: ${esc(U.name)} (${esc(U.code)})</div></div></div>${body}</div></div>`;
+  const nav=[['inicio','Inicio'],['terceros','Terceros'],['inventario','Inventario'],['CZ','Cotizaciones'],['FV','Facturas de venta'],['NV','Notas crédito de venta'],['FC','Facturas de compra'],['NP','Notas crédito de compra'],['GA','Documentos de gasto'],['RC','Recibos de caja'],['CE','Comprobantes de egreso'],['CC','Comprobantes contables'],['conc','Conciliación bancaria'],['reportes','Reportes'],['config','Configuración']];
+  const t={inicio:'Inicio',terceros:'Terceros',inventario:'Inventario',conc:'Conciliación bancaria',reportes:'Reportes',config:'Configuración'};
+  const body=view==='inicio'?vInicio():view==='terceros'?vTerceros():view==='inventario'?vInventario():TIPOS[view]?vDocs(view):view==='conc'?vConc():view==='reportes'?vReportes():vConfig();
+  a.innerHTML=`<div class="wrap"><div class="side"><h1>PAMAVA</h1><small>Simulador contable · PAMAVA Soluciones</small>${nav.map(n=>`${n[0]==='CZ'||n[0]==='conc'||n[0]==='config'?'<hr>':''}<a class="${view===n[0]?'on':''}" onclick="go('${n[0]}')">${n[1]}</a>`).join('')}<hr><a onclick="logout()">Salir</a></div>
+  <div class="main"><div class="top"><div><h2>${TIPOS[view]?PLUR[view]:t[view]}</h2><div class="emp">${S.empresa.nombre?esc(S.empresa.nombre)+' · NIT '+esc(S.empresa.nit):'Empresa sin configurar'} · Estudiante: ${esc(U.name)} (${esc(U.code)})</div></div></div>${body}</div></div>`;
 }
 function go(v){view=v;render();window.scrollTo(0,0)}
 function loginView(){
-  let last=null;try{last=JSON.parse(ls.get('pv_last')||'null')}catch(e){}
+  let last=null;try{last=JSON.parse(ls.get('pv2_last')||'null')}catch(e){}
   return `<div class="login"><h1>PAMAVA</h1><p><b>Simulador contable</b> — practica facturación, inventario y contabilidad sin riesgo. Tu empresa es solo tuya y se puede reiniciar cuando quieras.</p>
   <label>Nombre completo</label><input id="ln" value="${last?esc(last.name):''}" placeholder="Ej: Ana Pérez">
   <label>Tu código (el que te dio el profesor)</label><input id="lc" value="${last?esc(last.code):''}" placeholder="Ej: 1023" onkeydown="if(event.key==='Enter')login()">
@@ -232,9 +168,9 @@ function loginView(){
 function vInicio(){
   const {J,st}=D(),k=kpis(J,st,S.productos),e=S.empresa;
   const kp=[['Ventas',k.ventas],['Costo de ventas',k.costoVentas],['Utilidad del período',k.utilidad],['Bancos',k.bancos],['Caja',k.caja],['Clientes por cobrar',k.clientes],['Proveedores por pagar',k.proveedores],['Inventario',k.inventario]];
-  return `<div class="card"><b>${esc(e.nombre)}</b><br>NIT ${e.nit} · Actividad: ${esc(e.actividad)}<br>${esc(e.dir)} · Tel ${esc(e.tel)}<div class="note">Tu empresa ya tiene saldo inicial en caja, bancos y capital. Registra los documentos de <b>Mi práctica</b> en cada módulo y revisa los reportes.</div></div>
+  return `<div class="card">${e.nombre?`<b>${esc(e.nombre)}</b><br>NIT ${esc(e.nit)} · ${esc(e.actividad)}<br>${esc(e.dir)} · Tel ${esc(e.tel)}`:'<b>Tu empresa está en blanco</b>'}<div class="note">Este simulador empieza vacío. Trabaja con las hojas que imprimiste y ve montando tu empresa paso a paso.</div></div>
   <div class="grid">${kp.map(x=>`<div class="kpi"><span>${x[0]}</span><b>${fmt(x[1])}</b></div>`).join('')}</div>
-  <div class="card"><b>Cómo trabajar</b><ol><li>Abre <b>Mi práctica</b> y mira tus documentos (facturas, soportes de pago).</li><li>Registra cada uno en su módulo: compras, ventas, recibos, egresos y comprobantes.</li><li>Entra a <b>Reportes</b> y revisa balance de prueba, estados financieros y cartera.</li><li>¿Te equivocaste? Elimina el documento y créalo de nuevo, o reinicia todo en <b>Configuración</b>.</li></ol></div>`}
+  <div class="card"><b>Orden sugerido</b><ol><li><b>Configuración:</b> escribe los datos de tu empresa.</li><li><b>Comprobantes contables:</b> registra el saldo inicial (caja, bancos y capital).</li><li><b>Terceros:</b> crea tus clientes y proveedores.</li><li><b>Inventario:</b> crea tus productos (las existencias llegan con las compras).</li><li>Registra los documentos del mes: primero compras, luego ventas, recibos, egresos y gastos.</li><li>Revisa <b>Reportes</b> y la <b>Conciliación bancaria</b>.</li></ol><p>¿Te equivocaste? Elimina el documento y créalo de nuevo, o borra todo en <b>Configuración</b>.</p></div>`}
 
 /* ---------- Terceros ---------- */
 function vTerceros(){
@@ -248,7 +184,7 @@ function delTer(id){if(S.docs.some(d=>d.ter===id||(d.lines||[]).some(l=>l.ter===
 /* ---------- Inventario ---------- */
 function vInventario(){
   const {st}=D();
-  return `<p><button class="btn" onclick="formProd()">+ Nuevo producto</button></p><div class="tw"><table><tr><th>Código</th><th>Producto</th><th class="r">Costo promedio</th><th class="r">Precio venta</th><th class="r">IVA</th><th class="r">Existencias</th><th class="r">Valor</th><th></th></tr>${S.productos.map(p=>{const s=st[p.id]||{q:0,c:0};return`<tr><td>${p.cod}</td><td>${esc(p.nombre)}</td><td class="r">${fmt(s.q>0?s.c:p.costo)}</td><td class="r">${fmt(p.precio)}</td><td class="r">${p.iva}%</td><td class="r">${s.q}</td><td class="r">${fmt(s.q*s.c)}</td><td class="r"><button class="btn sec sm" onclick="kardex('${p.id}')">Kárdex</button> <button class="btn del sm" onclick="delProd('${p.id}')">Eliminar</button></td></tr>`}).join('')}</table></div>`}
+  return `<p><button class="btn" onclick="formProd()">+ Nuevo producto</button></p><div class="tw"><table><tr><th>Código</th><th>Producto</th><th class="r">Costo promedio</th><th class="r">Precio venta</th><th class="r">IVA</th><th class="r">Existencias</th><th class="r">Valor</th><th></th></tr>${S.productos.map(p=>{const s=st[p.id]||{q:0,c:0};return`<tr><td>${p.cod}</td><td>${esc(p.nombre)}</td><td class="r">${fmt(s.q>0?s.c:p.costo)}</td><td class="r">${fmt(p.precio)}</td><td class="r">${p.iva}%</td><td class="r">${s.q}</td><td class="r">${fmt(s.q*s.c)}</td><td class="r"><button class="btn sec sm" onclick="kardex('${p.id}')">Kárdex</button> <button class="btn del sm" onclick="delProd('${p.id}')">Eliminar</button></td></tr>`}).join('')||'<tr><td colspan=8>Aún no has creado productos. Usa «+ Nuevo producto».</td></tr>'}</table></div>`}
 function formProd(){modal(`<h3>Nuevo producto</h3><label>Nombre</label><input id="f1"><div class="row"><div><label>Costo</label><input id="f2" type="number" min="0"></div><div><label>Precio de venta</label><input id="f3" type="number" min="0"></div><div><label>IVA</label><select id="f4"><option>19</option><option>5</option><option>0</option></select></div></div><p><button class="btn" onclick="saveProd()">Guardar</button> <button class="btn sec" onclick="closeM()">Cancelar</button></p>`)}
 function saveProd(){const n=$('#f1').value.trim();if(!n)return toast('Escribe el nombre');S.productos.push({id:'P'+(++S.seq),cod:String(S.productos.length+1).padStart(3,'0'),nombre:n,costo:+$('#f2').value||0,precio:+$('#f3').value||0,iva:+$('#f4').value});save();closeM();render()}
 function delProd(id){if(S.docs.some(d=>(d.items||[]).some(i=>i.p===id)))return toast('Tiene movimientos: elimina esos documentos primero');S.productos=S.productos.filter(p=>p.id!==id);save();render()}
@@ -359,76 +295,27 @@ function edadHTML(J){
   rows.push(`<tr><td><b>Total</b></td>${tot.map(x=>`<td class="r"><b>${fmt(x)}</b></td>`).join('')}<td class="r"><b>${fmt(tot.reduce((s,x)=>s+x,0))}</b></td></tr>`);
   return `<div class="tabs"><button class="${repTipo==='cli'?'on':''}" onclick="repTipo='cli';render()">Clientes</button><button class="${repTipo==='prov'?'on':''}" onclick="repTipo='prov';render()">Proveedores</button></div><div class="row"><div><label>Fecha de corte</label><input type="date" value="${corte}" onchange="repCorte=this.value;render()"></div></div><br><div class="tw"><table><tr><th>Tercero</th>${B.map(x=>`<th class="r">${x}</th>`).join('')}<th class="r">Total</th></tr>${rows.join('')}</table></div><h4>Detalle por documento</h4><div class="tw"><table><tr><th>Tercero</th><th>Documento</th><th>Vence</th><th class="r">Saldo</th><th class="r">Días vencido</th></tr>${det.join('')||'<tr><td colspan=5>Sin saldos pendientes</td></tr>'}</table></div>`}
 
-/* ---------- Documentos de práctica (imprimibles) ---------- */
-function paperItems(d,base,ret){const c=docCalc(d),rt=ret?retAmt(d,c.base):0;return `<table><tr><th>Descripción</th><th class="r">Cant.</th><th class="r">Vr. unitario</th><th class="r">IVA</th><th class="r">Total</th></tr>${d.items.map(i=>{const p=base.productos.find(x=>x.id===i.p);return`<tr><td>${esc(p.nombre)}</td><td class="r">${i.qty}</td><td class="r">${fmt(i.precio)}</td><td class="r">${i.iva}%</td><td class="r">${fmt(i.qty*i.precio)}</td></tr>`}).join('')}<tr><td colspan=4 class="r">Subtotal</td><td class="r">${fmt(c.base)}</td></tr><tr><td colspan=4 class="r">IVA</td><td class="r">${fmt(c.iva)}</td></tr><tr><td colspan=4 class="r"><b>TOTAL</b></td><td class="r"><b>${fmt(c.total)}</b></td></tr>${rt?`<tr><td colspan=5 class="r">Esta empresa practica retención en la fuente del ${d.rete.pct}% sobre la base: ${fmt(rt)} (valor neto a pagar: ${fmt(c.total-rt)})</td></tr>`:''}</table>`}
-function paperHTML(d,base,st){
-  const e=base.empresa,tr=base.terceros.find(t=>t.id===d.ter)||{};const pay=d.pago==='credito'?'Crédito a '+(d.dias||30)+' días':'Contado';
-  const badge=st===undefined?'':(st?'<span class="badge ok">✔ Registrado</span>':'<span class="badge">Pendiente</span>');
-  const hd=(l,r)=>`<div class="paper"><div class="ph"><div>${l}</div><div style="text-align:right">${r}</div></div>`;
-  const end=(m,x)=>`<div class="todo">▶ Registrar en: <b>${m}</b>${x?' · '+x:''} ${badge}</div><div class="wm">PAMAVA Soluciones</div></div>`;
-  const prov=`<b>${esc(tr.nombre)}</b><br>NIT ${tr.doc}<br>${esc(tr.dir)} · Tel ${esc(tr.tel)}`,yo=`<b>${esc(e.nombre)}</b><br>NIT ${e.nit}`;
-  const cli=`Cliente: <b>${esc(tr.nombre)}</b> · ${tr.tipoDoc} ${tr.doc}`;
-  if(d.tipo==='FC')return hd(prov,`<div class="pt">FACTURA DE VENTA</div>No. <b>${d.numProv}</b><br>Fecha: ${d.fecha}`)+`Señores: <b>${esc(e.nombre)}</b> · NIT ${e.nit}<br>Forma de pago: <b>${pay}</b>${paperItems(d,base,true)}`+end('Facturas de compra',d.rete?'campo Retención: elige la opción de '+d.rete.pct+'%':'');
-  if(d.tipo==='FV')return hd(yo,`<div class="pt">PEDIDO DE VENTA</div>Fecha: ${d.fecha}`)+`${cli}<br>Forma de pago: <b>${pay}</b>${d.pago==='contado'?' · Recibido en '+(d.medio==='banco'?'Bancos':'Caja general'):''}${paperItems(d,base)}`+end('Facturas de venta');
-  if(d.tipo==='CZ')return hd(yo,`<div class="pt">COTIZACIÓN</div>Fecha: ${d.fecha}`)+`Para: <b>${esc(tr.nombre)}</b> · ${tr.tipoDoc} ${tr.doc}<br>El cliente aceptó esta cotización.${paperItems(d,base)}`+end('Cotizaciones','luego pulsa «Facturar» y conviértela en factura de venta a crédito de 30 días');
-  if(d.tipo==='NV')return hd(yo,`<div class="pt">SOLICITUD DE DEVOLUCIÓN</div>Fecha: ${d.fecha}`)+`${cli}<br>El cliente devuelve esta mercancía y se le reintegra el dinero en efectivo (Caja general).${paperItems(d,base)}`+end('Notas crédito de venta','devolución en efectivo');
-  if(d.tipo==='NP')return hd(prov,`<div class="pt">NOTA CRÉDITO DEL PROVEEDOR</div>Fecha: ${d.fecha}`)+`Para: <b>${esc(e.nombre)}</b> · NIT ${e.nit}<br>Devolución de mercancía; el proveedor reintegra el dinero a Bancos.${paperItems(d,base)}`+end('Notas crédito de compra','recibido en Bancos');
-  if(d.tipo==='GA'){const c=docCalc(d);return hd(prov,`<div class="pt">FACTURA DE SERVICIOS</div>Fecha: ${d.fecha}`)+`Cliente: <b>${esc(e.nombre)}</b> · NIT ${e.nit}<br>Concepto: ${esc(d.concepto)}<br>Valor base: <b>${fmt(c.base)}</b> · IVA: ${fmt(c.iva)} · Total: <b>${fmt(c.total)}</b><br>Forma de pago: <b>${pay}</b>`+end('Documentos de gasto','cuenta '+d.cuenta+' '+PUC[d.cuenta])}
-  if(d.tipo==='RC')return hd(`<b>COMPROBANTE DE CONSIGNACIÓN / TRANSFERENCIA</b>`,`Fecha: ${d.fecha}`)+`Ordenante: <b>${esc(tr.nombre)}</b> · ${tr.tipoDoc} ${tr.doc}<br>Beneficiario: <b>${esc(e.nombre)}</b><br>Valor recibido: <b>${fmt(d.valor)}</b> (en Bancos)<br>Concepto: ${esc(d.concepto)}`+end('Recibos de caja');
-  if(d.tipo==='CE')return hd(`<b>${esc(e.nombre)}</b><br>ORDEN DE PAGO A PROVEEDOR`,`Fecha: ${d.fecha}`)+`Pagar a: <b>${esc(tr.nombre)}</b> · NIT ${tr.doc}<br>Valor: <b>${fmt(d.valor)}</b> · Medio: Bancos${d.pend?' (cheque entregado, el proveedor aún no lo ha cobrado)':''}<br>Concepto: ${esc(d.concepto)}`+end('Comprobantes de egreso');
-  return hd(`<b>SOPORTE DE GASTO</b>`,`Fecha: ${d.fecha}`)+`${esc(d.concepto)}<br>Valor: <b>${fmt(d.lines[0].d)}</b>`+end('Comprobantes contables','cuentas: '+d.nota)}
-function paperExtracto(base,pack){
-  const rows=extractoData(base,pack),e=base.empresa;
-  return `<div class="paper"><div class="ph"><div><b>BANCO ANDINO · EXTRACTO BANCARIO</b><br>Titular: ${esc(e.nombre)} · NIT ${e.nit}</div><div style="text-align:right">Período ${PERIODO}</div></div><table><tr><th>Fecha</th><th>Descripción</th><th class="r">Ingresa</th><th class="r">Sale</th><th class="r">Saldo</th></tr>${rows.map(x=>`<tr><td>${x.f}</td><td>${x.t}</td><td class="r">${x.de?fmt(x.de):''}</td><td class="r">${x.ha?fmt(x.ha):''}</td><td class="r">${fmt(x.s)}</td></tr>`).join('')}<tr><td colspan=4 class="r"><b>SALDO FINAL DEL EXTRACTO</b></td><td class="r"><b>${fmt(rows.length?rows[rows.length-1].s:0)}</b></td></tr></table><div class="todo">▶ Úsalo en: <b>Conciliación bancaria</b> (compara con tus libros y registra lo que falte)</div><div class="wm">PAMAVA Soluciones</div></div>`}
-function studentPack(code,name,matchFn){
-  const base=genBase(code),pack=genPack(code,base),e=base.empresa;
-  const order=['CZ','FC','NP','FV','NV','GA','RC','CE','CC'];
-  const head=`<div class="card" style="page-break-after:avoid"><h2 style="margin:0;color:#12365f">PAMAVA · Simulador contable — Documentos de práctica</h2>Estudiante: <b>${esc(name)}</b> · Código: <b>${esc(code)}</b><br>Empresa: <b>${esc(e.nombre)}</b> · NIT ${e.nit} · ${esc(e.actividad)}<br>${esc(e.dir)}<br><small>IVA 19% · Período ${PERIODO} · PAMAVA Soluciones</small></div>`;
-  const ps=order.flatMap(t=>pack.filter(d=>d.tipo===t&&!d.hide)).map(d=>paperHTML(d,base,matchFn?matchFn(d):undefined)).join('');
-  return head+ps+paperExtracto(base,pack)}
-function vPractica(){
-  const mine={};S.docs.filter(d=>!d.ini).forEach(d=>{const k=docKey(d);mine[k]=(mine[k]||0)+1});
-  const base=genBase(U.code),pack=genPack(U.code,base),used={};
-  const match=d=>{const k=docKey(d);used[k]=(used[k]||0)+1;return (mine[k]||0)>=used[k]};
-  const shown=pack.filter(d=>!d.hide),done=shown.filter(d=>{const k=docKey(d);return mine[k]}).length;
-  return `<div class="note noprint">Estos son tus documentos. Regístralos en cada módulo. Avance: <b>${Math.min(done,shown.length)} de ${shown.length}</b>. Para imprimirlos, pulsa el botón y abre el archivo descargado (Ctrl+P).</div><p class="noprint"><button class="btn" onclick="dlStudent()">Descargar para imprimir</button></p>${studentPack(U.code,U.name,match)}`}
-function docKey(d){return d.tipo+'|'+(d.ter||'')+'|'+docTotal(d)}
-const PAGE_CSS=()=>document.querySelector('style').textContent;
-async function download(name,html){
-  try{const dl=await claude.use('downloads');if(dl){await dl.save({filename:name,data:html});return}}catch(e){if(e&&e.code==='declined')return}
-  const blob=new Blob([html],{type:'text/html'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();a.remove();toast('Archivo generado: ábrelo e imprime con Ctrl+P')}
-const wrapDoc=(t,body)=>`<!DOCTYPE html><html lang="es"><head><meta charset="utf-8"><title>${t}</title><style>${PAGE_CSS()}</style></head><body><div style="padding:16px;max-width:820px;margin:auto">${body}</div></body></html>`;
-function dlStudent(){download('PAMAVA_documentos_'+U.code+'.html',wrapDoc('Documentos de práctica',studentPack(U.code,U.name)))}
-
 /* ---------- Configuración ---------- */
-function vConfig(){return `<div class="card"><b>Borrar solo los documentos</b><p>Elimina facturas, recibos, egresos y comprobantes. Conserva terceros y productos. Ideal para repetir la práctica.</p><button class="btn del" onclick="confirmM('¿Borrar todos tus documentos?','resetDocs()')">Borrar todos los documentos</button></div>
-  <div class="card"><b>Reiniciar mi empresa completa</b><p>Vuelve todo al estado original: terceros, productos y saldo inicial.</p><button class="btn del" onclick="confirmM('¿Reiniciar toda tu empresa?','resetAll()')">Reiniciar empresa</button></div>`}
+function vConfig(){const e=S.empresa;return `<div class="card"><b>Datos de la empresa</b><p class="emp">Escribe aquí los datos de tu empresa tal como aparecen en tus documentos.</p><div class="row"><div><label>Nombre o razón social</label><input id="e1" value="${esc(e.nombre)}"></div><div><label>NIT</label><input id="e2" value="${esc(e.nit)}"></div><div><label>Actividad</label><input id="e3" value="${esc(e.actividad)}"></div></div><div class="row"><div><label>Dirección</label><input id="e4" value="${esc(e.dir)}"></div><div><label>Teléfono</label><input id="e5" value="${esc(e.tel)}"></div></div><p><button class="btn" onclick="saveEmp()">Guardar datos</button></p></div>
+  <div class="card"><b>Borrar solo los documentos</b><p>Elimina facturas, recibos, egresos y comprobantes. Conserva datos de la empresa, terceros y productos. Ideal para repetir la práctica.</p><button class="btn del" onclick="confirmM('¿Borrar todos tus documentos?','resetDocs()')">Borrar todos los documentos</button></div>
+  <div class="card"><b>Dejar mi empresa totalmente en blanco</b><p>Borra todo: datos de la empresa, terceros, productos y documentos.</p><button class="btn del" onclick="confirmM('¿Borrar todo y dejar la empresa en blanco?','resetAll()')">Borrar todo</button></div>`}
+function saveEmp(){S.empresa={nombre:$('#e1').value.trim(),nit:$('#e2').value.trim(),actividad:$('#e3').value.trim(),dir:$('#e4').value.trim(),tel:$('#e5').value.trim()};save();toast('Datos guardados');render()}
 function confirmM(t,fn){modal(`<h3>${t}</h3><p>Esta acción no se puede deshacer.</p><p><button class="btn" style="background:#b3261e" onclick="${fn}">Sí, continuar</button> <button class="btn sec" onclick="closeM()">Cancelar</button></p>`)}
-function resetDocs(){const b=genBase(U.code);S.docs=[b.ini];S.cons=CONS0();S.conc={};S.extracto=0;save();closeM();view='inicio';render();toast('Documentos borrados')}
-function resetAll(){S=newState(U.code);save();closeM();view='inicio';render();toast('Empresa reiniciada')}
+function resetDocs(){S.docs=[];S.cons=CONS0();S.conc={};S.extracto=0;save();closeM();view='inicio';render();toast('Documentos borrados')}
+function resetAll(){S=newState(U.code);save();closeM();view='inicio';render();toast('Empresa en blanco')}
 
 /* ---------- Profesor ---------- */
-function teacherLogin(){
-  const pin=ls.get('pv_pin')||'1234';modal(`<h3>Acceso profesor</h3><label>PIN</label><input id="pin" type="password" onkeydown="if(event.key==='Enter')teacherEnter()"><p class="emp">PIN inicial: 1234 (puedes cambiarlo dentro).</p><p><button class="btn" onclick="teacherEnter()">Entrar</button> <button class="btn sec" onclick="closeM()">Cancelar</button></p>`)}
-function teacherEnter(){if($('#pin').value!==(ls.get('pv_pin')||'1234'))return toast('PIN incorrecto');closeM();teacher=true;render()}
-function parseList(txt){return txt.split(/\n/).map(l=>l.trim()).filter(Boolean).map(l=>{const m=l.split(/[,;\t]/);const code=normCode(m[0]);return{code,name:(m[1]||m[0]).trim()}}).filter(x=>x.code)}
+function teacherLogin(){modal(`<h3>Acceso profesor</h3><label>PIN</label><input id="pin" type="password" onkeydown="if(event.key==='Enter')teacherEnter()"><p class="emp">PIN inicial: 1234 (puedes cambiarlo dentro).</p><p><button class="btn" onclick="teacherEnter()">Entrar</button> <button class="btn sec" onclick="closeM()">Cancelar</button></p>`)}
+function teacherEnter(){if($('#pin').value!==(ls.get('pv2_pin')||'1234'))return toast('PIN incorrecto');closeM();teacher=true;render()}
 function teacherView(){
   const us=users(),keys=Object.keys(us);
   return `<div class="main" style="max-width:980px;margin:auto"><div class="top"><h2>PAMAVA · Panel del profesor</h2><button class="btn sec" onclick="logout()">Salir</button></div>
-  <div class="card"><b>1. Documentos de práctica por estudiante</b><p>Escribe un estudiante por línea: <code>código, nombre</code>. Cada código genera una empresa y documentos distintos (siempre los mismos para ese código).</p><textarea id="tl" rows="6" placeholder="1023, Ana Pérez&#10;1024, Luis Gómez">${esc(TP.txt)}</textarea><p><button class="btn" onclick="tPrev()">Vista previa del primero</button> <button class="btn" onclick="tDl(false)">Descargar documentos de todos (imprimir)</button> <button class="btn sec" onclick="tDl(true)">Descargar hoja de respuestas del docente</button></p><div id="tp">${TP.msg}</div></div>
-  <div class="card"><b>2. Estudiantes que han entrado en este equipo</b><div class="tw"><table><tr><th>Código</th><th>Nombre</th><th>Documentos</th><th></th></tr>${keys.map(c=>{let n=0;try{n=JSON.parse(ls.get('pv_d_'+c)).docs.length-1}catch(e){}return`<tr><td>${esc(c)}</td><td>${esc(us[c].name)}</td><td>${n}</td><td class="r"><button class="btn sec sm" onclick="tOpen('${esc(c)}')">Abrir su trabajo</button> <button class="btn del sm" onclick="confirmM('¿Borrar los datos de ${esc(c)}?','tDel(\\'${esc(c)}\\')')">Borrar</button></td></tr>`}).join('')||'<tr><td colspan=4>Ninguno todavía</td></tr>'}</table></div><p><button class="btn del" onclick="confirmM('¿Borrar los datos de TODOS los estudiantes de este equipo?','tDelAll()')">Borrar todos los datos de este equipo</button></p></div>
-  <div class="card"><b>3. Cambiar PIN</b><div class="row"><input id="np" placeholder="Nuevo PIN"><button class="btn" onclick="ls.set('pv_pin',$('#np').value||'1234');toast('PIN guardado')">Guardar</button></div></div>
-  <div class="note">Los datos de cada estudiante se guardan en su propio dispositivo: allí es donde puede reiniciar con un clic (Configuración). Aquí ves y borras solo a quienes entraron en este equipo.</div></div>`}
-function tPrev(){TP.txt=$('#tl').value;const l=parseList(TP.txt);if(!l.length)return toast('Escribe al menos un estudiante');TP.msg=`<div style="margin-top:10px">${studentPack(l[0].code,l[0].name)}</div>`;render()}
-function tDl(key){TP.txt=$('#tl').value;const l=parseList(TP.txt);if(!l.length)return toast('Escribe al menos un estudiante');
-  let body;
-  if(!key)body=l.map(x=>`<div style="page-break-before:always">${studentPack(x.code,x.name)}</div>`).join('');
-  else body=l.map(x=>{const b=genBase(x.code),pk=genPack(x.code,b),r=derive([b.ini,...pk],b.productos),k=kpis(r.J,r.st,b.productos);
-    return`<div style="page-break-before:always"><div class="card"><b>${esc(x.name)}</b> (${esc(x.code)}) — ${esc(b.empresa.nombre)}<table><tr><th>Concepto</th><th class="r">Resultado esperado</th></tr>${[['Ventas',k.ventas],['Costo de ventas',k.costoVentas],['Gastos',k.gastos],['Utilidad del período',k.utilidad],['Bancos',k.bancos],['Caja',k.caja],['Clientes por cobrar',k.clientes],['Proveedores por pagar',k.proveedores],['Inventario',k.inventario],['IVA por pagar (generado − descontable)',k.ivaPagar],['Saldo final del extracto bancario',(extractoData(b,pk).slice(-1)[0]||{s:0}).s]].map(a=>`<tr><td>${a[0]}</td><td class="r">${fmt(a[1])}</td></tr>`).join('')}</table></div></div>`}).join('');
-  download(key?'PAMAVA_hoja_respuestas_docente.html':'PAMAVA_documentos_estudiantes.html',wrapDoc('PAMAVA',body))}
+  <div class="card"><b>Estudiantes que han entrado en este equipo</b><div class="tw"><table><tr><th>Código</th><th>Nombre</th><th>Documentos</th><th></th></tr>${keys.map(c=>{let n=0;try{n=JSON.parse(ls.get('pv2_d_'+c)).docs.length}catch(e){}return`<tr><td>${esc(c)}</td><td>${esc(us[c].name)}</td><td>${n}</td><td class="r"><button class="btn sec sm" onclick="tOpen('${esc(c)}')">Abrir su trabajo</button> <button class="btn del sm" onclick="confirmM('¿Borrar los datos de ${esc(c)}?','tDel(\\'${esc(c)}\\')')">Borrar</button></td></tr>`}).join('')||'<tr><td colspan=4>Ninguno todavía</td></tr>'}</table></div><p><button class="btn del" onclick="confirmM('¿Borrar los datos de TODOS los estudiantes de este equipo?','tDelAll()')">Borrar todos los datos de este equipo</button></p></div>
+  <div class="card"><b>Cambiar PIN</b><div class="row"><input id="np" placeholder="Nuevo PIN"><button class="btn" onclick="ls.set('pv2_pin',$('#np').value||'1234');toast('PIN guardado')">Guardar</button></div></div>
+  <div class="note">Este simulador está en blanco: los estudiantes crean la empresa, los terceros, los productos y los documentos a partir de las hojas que imprimes con el generador de documentos. Los datos de cada estudiante se guardan en su propio dispositivo; allí puede borrarlos en Configuración.</div></div>`}
 function tOpen(c){const us=users();doLogin(us[c].name,c)}
-function tDel(c){ls.del('pv_d_'+c);const us=users();delete us[c];ls.set('pv_users',JSON.stringify(us));closeM();render()}
-function tDelAll(){Object.keys(users()).forEach(c=>ls.del('pv_d_'+c));ls.set('pv_users','{}');closeM();render()}
+function tDel(c){ls.del('pv2_d_'+c);const us=users();delete us[c];ls.set('pv2_users',JSON.stringify(us));closeM();render()}
+function tDelAll(){Object.keys(users()).forEach(c=>ls.del('pv2_d_'+c));ls.set('pv2_users','{}');closeM();render()}
 
 /* ---------- Modal ---------- */
 function modal(h){$('#ov').innerHTML=`<div class="md">${h}</div>`}
