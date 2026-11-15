@@ -105,6 +105,34 @@ label{display:block;font-size:12px;color:var(--mut);margin:8px 0 3px}
 .mtab{width:100%}.mtab td{vertical-align:middle}.mtab input,.mtab select{min-width:70px}
 @media(max-width:900px){.crmenu{grid-template-columns:repeat(2,170px)}.dcols{grid-template-columns:1fr}.brand{min-width:0}.brand small{display:none}.side{width:100%;height:auto;top:auto;position:static}.tbr .chipE{display:none}}
 @media print{.topbar{display:none!important}}
+
+.pt{display:flex;min-height:100vh}.prail{width:68px;background:var(--b600);display:flex;flex-direction:column;align-items:center;gap:10px;padding-top:14px;flex-shrink:0}
+.prail div{width:46px;height:46px;border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:19px;cursor:pointer}.prail div:hover,.prail div.on{background:var(--b800)}
+.pmain{flex:1;min-width:0}.phead{display:flex;align-items:center;gap:14px;padding:0 24px;height:62px;background:#fff;border-bottom:1px solid var(--b200)}
+.phead .brand{min-width:0}.phead .tit{font-size:17px;color:var(--b800)}.phead .sp{flex:1}
+.pdd{position:relative}.pdd>button{border:1px solid var(--b500);background:#fff;color:var(--b600);border-radius:8px;padding:8px 14px;cursor:pointer;font-size:13px}
+.pdd .menu{position:absolute;right:0;top:42px;background:#fff;border:1px solid var(--b200);border-radius:10px;box-shadow:0 8px 24px rgba(10,35,66,.18);min-width:230px;z-index:40;padding:6px}.pdd .menu div{padding:8px 12px;border-radius:6px;cursor:pointer;font-size:13px;color:var(--b800)}.pdd .menu div:hover{background:var(--b100)}
+.pwel{background:#fff;padding:22px 28px;border-bottom:1px solid var(--b200)}.pwel h1{margin:0 0 6px;font-weight:400;color:var(--b900);font-size:26px}.pwel p{margin:0;color:var(--mut)}
+.pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:22px;padding:24px 28px}
+.pc{background:#fff;border-radius:10px;box-shadow:0 2px 8px rgba(10,35,66,.12);overflow:hidden;cursor:pointer;transition:.15s}.pc:hover{transform:translateY(-3px);box-shadow:0 8px 20px rgba(39,103,176,.25)}
+.pc .im{height:150px;display:flex;align-items:center;justify-content:center;font-size:56px;color:#fff;background:linear-gradient(135deg,var(--b800),var(--b500))}
+.pc:nth-child(2) .im{background:linear-gradient(135deg,#0d3b73,#2a8bd6)}.pc:nth-child(3) .im{background:linear-gradient(135deg,#1b4f8a,#5aa6e6)}.pc:nth-child(4) .im{background:linear-gradient(135deg,#0a2342,#3b82d6)}.pc:nth-child(5) .im{background:linear-gradient(135deg,#12365f,#4a9be0)}
+.pc .tx{padding:14px 16px}.pc h4{margin:0 0 4px;color:var(--b900);font-size:17px}.pc p{margin:0;color:var(--mut);font-size:13px}
+@media(max-width:700px){.prail{display:none}}
+
+.side{width:88px!important;padding:8px 0!important;background:var(--b600)!important;overflow-y:auto}
+.side hr{border-top:1px solid var(--b500)!important;margin:6px 10px!important}
+.rl{display:flex;flex-direction:column;align-items:center;gap:3px;padding:9px 2px;margin:2px 6px;border-radius:10px;color:#fff;cursor:pointer;font-size:10px;text-align:center;line-height:1.1}.rl i{font-style:normal;font-size:20px;line-height:1}.rl:hover,.rl.on,.rl.op{background:var(--b800)}
+.fly{position:fixed;left:88px;top:54px;bottom:0;width:250px;background:#fff;border-right:1px solid var(--b200);box-shadow:6px 0 20px rgba(10,35,66,.15);z-index:25;padding:14px 10px}.fly h5{margin:4px 10px 10px;color:var(--b800);font-size:15px}
+.fly div{padding:9px 12px;border-radius:8px;cursor:pointer;color:var(--b800)}.fly div:hover{background:var(--b100)}.fly div.on{background:var(--b100);color:var(--b600);font-weight:600}
+.cname{font-size:15px;color:var(--b900);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:34vw}
+.tbr .ib{font-size:21px;color:var(--b600);cursor:pointer;padding:0 6px}.tbr .gsi{width:240px;border-radius:20px;background:var(--b100)}
+.crmenu{left:auto!important;right:0}.tbr .av{display:flex;width:34px;height:34px;border-radius:50%;background:var(--b600);color:#fff;align-items:center;justify-content:center;font-weight:600;font-size:12px;cursor:pointer}
+.itabs{display:flex;gap:2px;border-bottom:1px solid var(--b500);margin-bottom:16px}.itabs button{border:1px solid transparent;border-bottom:0;background:transparent;color:var(--b900);padding:12px 18px;cursor:pointer;font-weight:600;font-size:13.5px;border-radius:8px 8px 0 0}.itabs button.on{background:#fff;color:var(--b600);border-color:var(--b500);margin-bottom:-1px}
+.wcard{background:#fff;border:1px solid var(--b200);border-radius:10px}.wcard h3{margin:0;padding:18px 26px;color:var(--b900);font-size:19px;border-bottom:1px solid var(--b200)}
+.wgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:22px 10px;padding:22px 20px 26px}.wgrid div{text-align:center;cursor:pointer;padding:6px;border-radius:10px}.wgrid div:hover{background:var(--b100)}
+.wgrid i{font-style:normal;display:flex;width:66px;height:66px;border-radius:50%;border:1px solid var(--b200);background:#fff;color:var(--b500);margin:0 auto 10px;align-items:center;justify-content:center;font-size:27px;box-shadow:0 1px 4px rgba(10,35,66,.1)}.wgrid span{font-size:13px;font-weight:600;color:var(--b900)}
+@media(max-width:900px){.side{width:100%!important;display:flex;flex-wrap:wrap}.fly{left:0;top:54px;width:100%}}
 </style>
 </head>
 <body>
@@ -233,7 +261,7 @@ function login(){
 function doLogin(name,code,emp){
   const raw=ls.get('pv2_d_'+code);try{S=raw?JSON.parse(raw):newState(code)}catch(e){S=newState(code)}
   U={name,code,emp};S.conc=S.conc||{};S.empleados=S.empleados||[];const us=users();us[code]={name,emp,t:Date.now()};ls.set('pv2_users',JSON.stringify(us));ls.set('pv2_last',JSON.stringify({name}));
-  save();view='inicio';teacher=false;render()}
+  save();view='portal';teacher=false;render()}
 function logout(){U=null;S=null;teacher=false;teacherOK=false;render()}
 const ter=id=>S.terceros.find(t=>t.id===id)||{nombre:'—'};
 const prod=id=>S.productos.find(p=>p.id===id)||{nombre:'—'};
@@ -261,27 +289,42 @@ function render(){
   const a=$('#app');
   if(teacher){a.innerHTML=teacherView();return}
   if(!U){a.innerHTML=loginView();return}
+  if(view==='portal'){a.innerHTML=portalView();return}
   const t={inicio:'Inicio',terceros:tab==='cliente'?'Clientes':'Proveedores',inventario:'Productos y existencias',empleados:'Empleados',glosario:'Glosario contable',conc:'Conciliación bancaria',reportes:'Reportes',config:'Configuración',plan:'Plan de cuentas',rete:'Retención en la fuente'};
   const body=view==='inicio'?vInicio():view==='terceros'?vTerceros():view==='inventario'?vInventario():view==='empleados'?vEmpleados():TIPOS[view]?vDocs(view):view==='conc'?vConc():view==='reportes'?vReportes():view==='glosario'?vGlosario():view==='plan'?vPlan():view==='rete'?vRete():vConfig();
-  const cm=modOf(),act=openM||(cm&&cm.id);
-  const side=MENU.map(m=>{const on=cm&&cm.id===m.id;
-    if(m.v)return `<div class="mod ${on?'on':''}" onclick="go('${m.v}')"><i>${m.i}</i>${m.n}</div>`;
-    const open=act===m.id;
-    return `<div class="mod ${on?'on':''}" onclick="openM=${open&&!on?'null':`'${m.id}'`};render()"><i>${m.i}</i>${m.n}<span class="ar">${open?'▲':'▼'}</span></div>${open?`<div class="subs">${m.items.map(x=>`<div class="${leafOn(x[0])?'on':''}" onclick="go('${x[0]}')">${x[1]}</div>`).join('')}</div>`:''}`}).join('');
+  const cm=modOf();
+  const side=`<div class="rl" title="Volver al portal" onclick="go('portal')"><i>←</i><span>Portal</span></div><hr>`+MENU.map(m=>{const on=cm&&cm.id===m.id,open=openM===m.id;
+    return `<div class="rl ${on?'on':''} ${open?'op':''}" title="${m.n}" onclick="event.stopPropagation();${m.v?`go('${m.v}')`:`openM=${open?'null':`'${m.id}'`};crOpen=false;pdOpen=false;render()`}"><i>${m.i}</i><span>${m.n}</span></div>`}).join('');
+  const fm=openM?MENU.find(m=>m.id===openM):null;
+  const fly=fm&&fm.items?`<div class="fly" onclick="event.stopPropagation()"><h5>${fm.n}</h5>${fm.items.map(x=>`<div class="${leafOn(x[0])?'on':''}" onclick="go('${x[0]}')">${x[1]}</div>`).join('')}</div>`:'';
   const crear=`<div class="crmenu" onclick="event.stopPropagation()">
    <div class="c"><h6>Ventas</h6>${[['FV','Factura de venta'],['CZ','Cotización'],['NV','Nota crédito de venta'],['RC','Recibo de caja']].map(x=>`<div onclick="quick('${x[0]}')">${x[1]}</div>`).join('')}<div onclick="quick('cli')">Cliente</div></div>
    <div class="c"><h6>Compras y gastos</h6>${[['FC','Factura de compra'],['GA','Documento de gasto'],['NP','Nota crédito de compra'],['CE','Comprobante de egreso']].map(x=>`<div onclick="quick('${x[0]}')">${x[1]}</div>`).join('')}<div onclick="quick('pro')">Proveedor</div></div>
    <div class="c"><h6>Contabilidad</h6>${[['CC','Comprobante contable'],['AF','Compra de activo fijo'],['DP','Depreciación mensual'],['BA','Baja o venta de activo'],['DI','Declaración de IVA'],['CI','Cierre del ejercicio']].map(x=>`<div onclick="quick('${x[0]}')">${x[1]}</div>`).join('')}</div>
    <div class="c"><h6>Nómina e inventario</h6><div onclick="quick('emp')">Empleado</div>${[['NO','Liquidación de nómina'],['PN','Pago de nómina']].map(x=>`<div onclick="quick('${x[0]}')">${x[1]}</div>`).join('')}<div onclick="quick('prod')">Producto</div></div></div>`;
-  const sec=cm&&!cm.v?cm.n:(cm?cm.n:'');
   const ttl=TIPOS[view]?PLUR[view]:t[view];
-  a.innerHTML=`<div class="topbar" onclick="if(crOpen){crOpen=false;render()}"><div class="brand" onclick="go('inicio')"><b>PAMAVA</b><small>Soluciones</small></div>
-  <div class="crwrap"><button class="crbtn" onclick="event.stopPropagation();crOpen=!crOpen;render()">+ Crear</button>${crOpen?crear:''}</div>
-  <div class="gs"><input id="gs" placeholder="Buscar documentos, terceros o productos" onkeydown="if(event.key==='Enter')gsearch(this.value)" onclick="event.stopPropagation()"></div>
-  <div class="tbr"><span class="chipE">${S.empresa.nombre?esc(S.empresa.nombre):'Empresa '+U.emp+' (sin configurar)'}</span><span>${esc(U.name)}</span><button class="btn sec sm" onclick="event.stopPropagation();toggleG()">Guía: ${G.on?'sí':'no'}</button><button class="btn sec sm" onclick="event.stopPropagation();logout()">Salir</button></div></div>
-  <div class="wrap"><div class="side">${side}<div class="sfoot">PAMAVA Soluciones<br>Simulador contable</div></div>
+  const ini=U.name.split(' ').filter(Boolean).slice(0,2).map(x=>x[0]).join('').toUpperCase();
+  const ayuda=pdOpen==='a'?`<div class="menu" onclick="event.stopPropagation()"><div onclick="pdOpen=false;go('glosario')">Glosario contable</div><div onclick="pdOpen=false;toggleG()">${G.on?'Desactivar':'Activar'} las guías paso a paso</div><div onclick="pdOpen=false;inTab='map';go('inicio')">Mapa de procesos</div></div>`:'';
+  const usr=pdOpen==='u'?`<div class="menu" onclick="event.stopPropagation()"><div style="cursor:default;color:var(--mut)">${esc(U.name)}</div><div onclick="pdOpen=false;go('portal')">Mi portal</div><div onclick="pdOpen=false;go('config')">Guardar o recuperar mi trabajo</div><div onclick="logout()">Salir</div></div>`:'';
+  a.innerHTML=`<div class="topbar" onclick="if(crOpen||pdOpen){crOpen=false;pdOpen=false;render()}"><div class="brand" onclick="go('portal')"><b>PAMAVA</b><small>Soluciones</small></div><span class="cname">${S.empresa.nombre?esc(S.empresa.nombre):'Empresa '+U.emp+' (sin configurar)'}</span>
+  <div class="tbr">${srOpen?`<input id="gs" class="gsi" placeholder="Buscar y presiona Enter" onkeydown="if(event.key==='Enter'){srOpen=false;gsearch(this.value)}" onclick="event.stopPropagation()">`:''}<span class="ib" title="Buscar" onclick="event.stopPropagation();srOpen=!srOpen;render();if(srOpen)setTimeout(()=>{const e=$('#gs');e&&e.focus()},0)">⌕</span>
+  <div class="crwrap"><button class="crbtn" onclick="event.stopPropagation();crOpen=!crOpen;pdOpen=false;render()">+ Crear</button>${crOpen?crear:''}</div>
+  <div class="pdd"><button onclick="event.stopPropagation();pdOpen=pdOpen==='a'?false:'a';crOpen=false;render()">Ayuda ▾</button>${ayuda}</div>
+  <span class="ib" title="Configuración" onclick="go('config')">⚙</span>
+  <div class="pdd"><span class="av" onclick="event.stopPropagation();pdOpen=pdOpen==='u'?false:'u';crOpen=false;render()">${esc(ini)}</span>${usr}</div></div></div>
+  <div class="wrap" onclick="if(openM||crOpen||pdOpen){openM=null;crOpen=false;pdOpen=false;render()}"><div class="side">${side}</div>${fly}
   <div class="main"><div class="top"><div><div class="crumb">${cm?cm.n:''} ${view!=='inicio'?'› <b>'+ttl+'</b>':''}</div><h2>${ttl}</h2><div class="emp">${S.empresa.nombre?esc(S.empresa.nombre)+' · NIT '+esc(S.empresa.nit):'Empresa sin configurar'} · Empresa ${U.emp}</div></div></div>${guideBox()}${body}</div></div>`;
 }
+let srOpen=false;
+let pdOpen=false;
+function portalView(){
+  const c=(i,t,d,v,x)=>`<div class="pc" onclick="${x||`go('${v}')`}"><div class="im">${i}</div><div class="tx"><h4>${t}</h4><p>${d}</p></div></div>`;
+  return `<div class="pt" onclick="if(pdOpen){pdOpen=false;render()}"><div class="prail"><div class="on" title="Inicio">⌂</div><div title="Mi empresa" onclick="go('inicio')">▤</div><div title="Aprendizaje" onclick="go('glosario')">☺</div><div title="Guardar mi trabajo" onclick="go('config')">⚙</div></div>
+  <div class="pmain"><div class="phead"><div class="brand"><b>PAMAVA</b><small>Soluciones</small></div><span class="tit">Portal del estudiante</span><span class="sp"></span>
+   <div class="pdd"><button onclick="event.stopPropagation();pdOpen=pdOpen==='a'?false:'a';render()">Ayuda ▾</button>${pdOpen==='a'?`<div class="menu" onclick="event.stopPropagation()"><div onclick="pdOpen=false;go('glosario')">Glosario contable</div><div onclick="pdOpen=false;toggleG()">${G.on?'Desactivar':'Activar'} las guías paso a paso</div><div onclick="pdOpen=false;inTab='map';go('inicio')">Mapa de procesos</div></div>`:''}</div>
+   <div class="pdd"><button onclick="event.stopPropagation();pdOpen=pdOpen==='u'?false:'u';render()">${esc(U.name.toUpperCase().slice(0,22))} ▾</button>${pdOpen==='u'?`<div class="menu" onclick="event.stopPropagation()"><div onclick="pdOpen=false;go('config')">Guardar o recuperar mi trabajo</div><div onclick="logout()">Salir</div></div>`:''}</div></div>
+  <div class="pwel"><h1>Hola ${esc(U.name.split(' ')[0].toUpperCase())}, te damos la bienvenida</h1><p>Administra tu empresa de práctica desde el portal del estudiante. ¿Qué deseas hacer?</p></div>
+  <div class="pgrid">${c('▤','Mi empresa','Entra a tu empresa: facturas, inventario, nómina, impuestos y reportes.','inicio')}${c('✓','Mi ruta paso a paso','Mira qué has hecho y qué sigue, desde el saldo inicial hasta el cierre.','','inTab=\'rut\';go(\'inicio\')')}${c('☺','Aprendizaje','Glosario y guías simples para entender cada documento y cada asiento.','glosario')}${c('▣','Mapa de procesos','Ve cómo se conectan compras, ventas, nómina, activos e impuestos.','','inTab=\'map\';go(\'inicio\')')}${c('⚙','Guardar mi trabajo','Descarga tu archivo para continuar en otro equipo, o empieza de cero.','config')}</div></div></div>`}
 function quick(k){crOpen=false;
   if(k==='cli'){tab='cliente';view='terceros';render();formTer();$('#f1').value='cliente'}
   else if(k==='pro'){tab='proveedor';view='terceros';render();formTer();$('#f1').value='proveedor'}
@@ -302,24 +345,20 @@ function loginView(){
   <div style="text-align:center;color:#8aa;font-size:11px;margin-top:10px">PAMAVA Soluciones</div></div>`}
 
 /* ---------- Inicio ---------- */
-let inTab='res';
+let inTab='acc';
 function vInicio(){
   const {J,st}=D(),k=kpis(J,st,S.productos),e=S.empresa,Jn=Jnc(J),kn=kpis(Jn,st,S.productos);
   const has=t=>S.docs.some(d=>d.tipo===t);
-  const kp=[['Ventas',kn.ventas],['Utilidad del período',kn.utilidad],['Bancos',k.bancos],['Caja',k.caja],['Clientes por cobrar',k.clientes],['Proveedores por pagar',k.proveedores],['Inventario',k.inventario],['Activos fijos (neto)',bal(J,'15')],['IVA por pagar',k.ivaPagar]];
-  const ruta=[['Configura los datos de tu empresa',!!e.nombre,'config'],['Registra el saldo inicial (comprobante contable)',has('CC'),'CC'],['Crea tus clientes y proveedores',S.terceros.length>0,'clientes'],['Crea tus productos',S.productos.length>0,'inventario'],['Registra las compras de mercancía',has('FC'),'FC'],['Registra las ventas',has('FV'),'FV'],['Registra cobros y pagos',has('RC')&&has('CE'),'RC'],['Registra los gastos del mes',has('GA'),'GA'],['Activos fijos y depreciación',has('AF')&&has('DP'),'AF'],['Crea empleados',S.empleados.length>0,'empleados'],['Liquida y paga la nómina',has('NO')&&has('PN'),'NO'],['Concilia el banco',Object.keys(S.conc||{}).length>0,'conc'],['Declara el IVA',has('DI'),'DI'],['Cierra el ejercicio',has('CI'),'CI']];
-  const hecho=ruta.filter(x=>x[1]).length,pct=Math.round(hecho*100/ruta.length);
-  const first=(U.name||'').split(' ')[0];
-  const tabs=`<div class="tabs"><button class="${inTab==='res'?'on':''}" onclick="inTab='res';render()">Resumen</button><button class="${inTab==='map'?'on':''}" onclick="inTab='map';render()">Mapa de procesos</button></div>`;
+  const tb=[['acc','Accesos directos'],['ind','Indicadores'],['rut','Mi ruta paso a paso'],['map','Mapa de procesos']];
+  const tabs=`<div class="itabs">${tb.map(x=>`<button class="${inTab===x[0]?'on':''}" onclick="inTab='${x[0]}';render()">${x[1]}</button>`).join('')}</div>`;
   if(inTab==='map')return tabs+flowMap(J);
-  return tabs+`<div class="hero"><h3>Hola, ${esc(first)}</h3><p>${e.nombre?`<b>${esc(e.nombre)}</b> · NIT ${esc(e.nit)} · ${esc(e.actividad)}`:'Tu empresa está en blanco. Empieza por Configuración y sigue la ruta de abajo.'}</p></div>
-  <div class="sec2">Accesos rápidos</div>
-  <div class="qa">${[['FV','Crear factura de venta','$'],['FC','Crear factura de compra','↓'],['RC','Registrar recibo de caja','✓'],['CE','Registrar pago a proveedor','↑'],['cli','Crear cliente','+'],['prod','Crear producto','▣'],['CC','Comprobante contable','≡'],['NO','Liquidar nómina','☺']].map(x=>`<div onclick="quick('${x[0]}')"><i>${x[2]}</i>${x[1]}</div>`).join('')}</div>
-  <div class="sec2">Indicadores de tu empresa</div>
-  <div class="grid">${kp.map(x=>`<div class="kpi"><span>${x[0]}</span><b>${fmt(x[1])}</b></div>`).join('')}</div>
-  <div class="sec2">Tu ruta paso a paso <span class="emp">· ${hecho} de ${ruta.length} pasos (${pct}%)</span></div><div class="bar"><span style="width:${pct}%"></span></div>
-  <div class="ruta">${ruta.map((x,i)=>`<div class="${x[1]?'ok':''}"><b>${x[1]?'✓':i+1}</b><span>${x[0]}</span><button class="btn sec sm" onclick="${x[2]==='clientes'?"go('clientes')":`go('${x[2]}')`}">Ir</button></div>`).join('')}</div>
-  <div class="note">¿Te equivocaste? Elimina el documento y créalo de nuevo, o borra todo en <b>Configuración</b>. Los pasos se marcan solos cuando registras el documento.</div>`}
+  if(inTab==='ind'){const kp=[['Ventas',kn.ventas],['Utilidad del período',kn.utilidad],['Bancos',k.bancos],['Caja',k.caja],['Clientes por cobrar',k.clientes],['Proveedores por pagar',k.proveedores],['Inventario',k.inventario],['Activos fijos (neto)',bal(J,'15')],['IVA por pagar',k.ivaPagar]];
+    return tabs+`<div class="grid">${kp.map(x=>`<div class="kpi"><span>${x[0]}</span><b>${fmt(x[1])}</b></div>`).join('')}</div>`}
+  if(inTab==='rut'){const ruta=[['Configura los datos de tu empresa',!!e.nombre,'config'],['Registra el saldo inicial (comprobante contable)',has('CC'),'CC'],['Crea tus clientes y proveedores',S.terceros.length>0,'clientes'],['Crea tus productos',S.productos.length>0,'inventario'],['Registra las compras de mercancía',has('FC'),'FC'],['Registra las ventas',has('FV'),'FV'],['Registra cobros y pagos',has('RC')&&has('CE'),'RC'],['Registra los gastos del mes',has('GA'),'GA'],['Activos fijos y depreciación',has('AF')&&has('DP'),'AF'],['Crea empleados',S.empleados.length>0,'empleados'],['Liquida y paga la nómina',has('NO')&&has('PN'),'NO'],['Concilia el banco',Object.keys(S.conc||{}).length>0,'conc'],['Declara el IVA',has('DI'),'DI'],['Cierra el ejercicio',has('CI'),'CI']];
+    const hecho=ruta.filter(x=>x[1]).length,pct=Math.round(hecho*100/ruta.length);
+    return tabs+`<div class="sec2">${hecho} de ${ruta.length} pasos (${pct}%)</div><div class="bar"><span style="width:${pct}%"></span></div><div class="ruta">${ruta.map((x,i)=>`<div class="${x[1]?'ok':''}"><b>${x[1]?'✓':i+1}</b><span>${x[0]}</span><button class="btn sec sm" onclick="go('${x[2]}')">Ir</button></div>`).join('')}</div><div class="note">Los pasos se marcan solos cuando registras el documento. ¿Te equivocaste? Elimina el documento y créalo de nuevo, o borra todo en <b>Configuración</b>.</div>`}
+  const acc=[['FV','Crea una factura de venta','$'],['FC','Crea una factura de compra','↓'],['GA','Crea un documento de gasto','≡'],['cli','Crea un cliente','+'],['pro','Crea un proveedor','+'],['prod','Crea un producto o servicio','▣'],['RC','Registra un recibo de caja','✓'],['CE','Registra un pago a proveedor','↑'],['CC','Crea un comprobante contable','≡'],['NO','Liquida la nómina','☺']];
+  return tabs+`<div class="wcard"><h3>Te damos la bienvenida${U?', '+esc(U.name.split(' ')[0]):''}, ¿Qué deseas hacer?</h3><div class="wgrid">${acc.map(x=>`<div onclick="quick('${x[0]}')"><i>${x[2]}</i><span>${x[1]}</span></div>`).join('')}</div></div>`}
 
 /* ---------- Terceros ---------- */
 function vEmpleados(){
