@@ -68,6 +68,10 @@ const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;',
 const fmt=n=>'$ '+Math.round(n||0).toLocaleString('es-CO');
 const today=()=>new Date().toISOString().slice(0,10);
 const normCode=s=>String(s||'').trim().toLowerCase().replace(/\s+/g,'');
+function H(s){let h=1779033703^s.length;for(let i=0;i<s.length;i++){h=Math.imul(h^s.charCodeAt(i),3432918353);h=h<<13|h>>>19}return h>>>0}
+const SECRET='PV-clase-7Qm4',TEACH_HASH=1490599463;
+const studentPin=c=>String(H('s|'+c+'|'+SECRET)%9000+1000);
+const teachOK=p=>H('t|'+String(p||'').trim().toUpperCase()+'|'+SECRET)===TEACH_HASH;
 const mem={};
 const ls={get(k){try{const v=localStorage.getItem(k);return v==null?(mem[k]==null?null:mem[k]):v}catch(e){return mem[k]==null?null:mem[k]}},set(k,v){mem[k]=v;try{localStorage.setItem(k,v)}catch(e){}},del(k){delete mem[k];try{localStorage.removeItem(k)}catch(e){}}};
 const users=()=>{try{return JSON.parse(ls.get('pv2_users')||'{}')}catch(e){return{}}};
@@ -132,6 +136,7 @@ function save(){ls.set('pv2_d_'+U.code,JSON.stringify(S))}
 function login(){
   const name=$('#ln').value.trim(),code=normCode($('#lc').value);
   if(!name||!code)return toast('Escribe tu nombre y tu código');
+  if($('#lp').value.trim()!==studentPin(code))return toast('PIN incorrecto. Es el que aparece en tu hoja de documentos.');
   doLogin(name,code)}
 function doLogin(name,code){
   const raw=ls.get('pv2_d_'+code);try{S=raw?JSON.parse(raw):newState(code)}catch(e){S=newState(code)}
@@ -159,7 +164,8 @@ function loginView(){
   let last=null;try{last=JSON.parse(ls.get('pv2_last')||'null')}catch(e){}
   return `<div class="login"><h1>PAMAVA</h1><p><b>Simulador contable</b> — practica facturación, inventario y contabilidad sin riesgo. Tu empresa es solo tuya y se puede reiniciar cuando quieras.</p>
   <label>Nombre completo</label><input id="ln" value="${last?esc(last.name):''}" placeholder="Ej: Ana Pérez">
-  <label>Tu código (el que te dio el profesor)</label><input id="lc" value="${last?esc(last.code):''}" placeholder="Ej: 1023" onkeydown="if(event.key==='Enter')login()">
+  <label>Tu código (el que te dio el profesor)</label><input id="lc" value="${last?esc(last.code):''}" placeholder="Ej: 1023">
+  <label>Tu PIN (está en tu hoja de documentos)</label><input id="lp" type="password" inputmode="numeric" placeholder="4 dígitos" onkeydown="if(event.key==='Enter')login()">
   <p style="margin-top:14px"><button class="btn" onclick="login()">Entrar a mi empresa</button> <button class="btn sec" onclick="teacherLogin()">Soy profesor</button></p>
   <div class="note">Tus datos se guardan en este mismo dispositivo y navegador. Si cambias de equipo, empezarás con tu empresa en blanco.</div>
   <div style="text-align:center;color:#8aa;font-size:11px;margin-top:10px">PAMAVA Soluciones</div></div>`}
@@ -305,14 +311,13 @@ function resetDocs(){S.docs=[];S.cons=CONS0();S.conc={};S.extracto=0;save();clos
 function resetAll(){S=newState(U.code);save();closeM();view='inicio';render();toast('Empresa en blanco')}
 
 /* ---------- Profesor ---------- */
-function teacherLogin(){modal(`<h3>Acceso profesor</h3><label>PIN</label><input id="pin" type="password" onkeydown="if(event.key==='Enter')teacherEnter()"><p class="emp">PIN inicial: 1234 (puedes cambiarlo dentro).</p><p><button class="btn" onclick="teacherEnter()">Entrar</button> <button class="btn sec" onclick="closeM()">Cancelar</button></p>`)}
-function teacherEnter(){if($('#pin').value!==(ls.get('pv2_pin')||'1234'))return toast('PIN incorrecto');closeM();teacher=true;render()}
+function teacherLogin(){modal(`<h3>Acceso del docente</h3><label>Clave del docente</label><input id="pin" type="password" onkeydown="if(event.key==='Enter')teacherEnter()"><p><button class="btn" onclick="teacherEnter()">Entrar</button> <button class="btn sec" onclick="closeM()">Cancelar</button></p>`)}
+function teacherEnter(){if(!teachOK($('#pin').value))return toast('Clave incorrecta');closeM();teacher=true;render()}
 function teacherView(){
   const us=users(),keys=Object.keys(us);
   return `<div class="main" style="max-width:980px;margin:auto"><div class="top"><h2>PAMAVA · Panel del profesor</h2><button class="btn sec" onclick="logout()">Salir</button></div>
-  <div class="card"><b>Estudiantes que han entrado en este equipo</b><div class="tw"><table><tr><th>Código</th><th>Nombre</th><th>Documentos</th><th></th></tr>${keys.map(c=>{let n=0;try{n=JSON.parse(ls.get('pv2_d_'+c)).docs.length}catch(e){}return`<tr><td>${esc(c)}</td><td>${esc(us[c].name)}</td><td>${n}</td><td class="r"><button class="btn sec sm" onclick="tOpen('${esc(c)}')">Abrir su trabajo</button> <button class="btn del sm" onclick="confirmM('¿Borrar los datos de ${esc(c)}?','tDel(\\'${esc(c)}\\')')">Borrar</button></td></tr>`}).join('')||'<tr><td colspan=4>Ninguno todavía</td></tr>'}</table></div><p><button class="btn del" onclick="confirmM('¿Borrar los datos de TODOS los estudiantes de este equipo?','tDelAll()')">Borrar todos los datos de este equipo</button></p></div>
-  <div class="card"><b>Cambiar PIN</b><div class="row"><input id="np" placeholder="Nuevo PIN"><button class="btn" onclick="ls.set('pv2_pin',$('#np').value||'1234');toast('PIN guardado')">Guardar</button></div></div>
-  <div class="note">Este simulador está en blanco: los estudiantes crean la empresa, los terceros, los productos y los documentos a partir de las hojas que imprimes con el generador de documentos. Los datos de cada estudiante se guardan en su propio dispositivo; allí puede borrarlos en Configuración.</div></div>`}
+  <div class="card"><b>Estudiantes que han entrado en este equipo</b><div class="tw"><table><tr><th>Código</th><th>Nombre</th><th>PIN</th><th>Documentos</th><th></th></tr>${keys.map(c=>{let n=0;try{n=JSON.parse(ls.get('pv2_d_'+c)).docs.length}catch(e){}return`<tr><td>${esc(c)}</td><td>${esc(us[c].name)}</td><td>${studentPin(c)}</td><td>${n}</td><td class="r"><button class="btn sec sm" onclick="tOpen('${esc(c)}')">Abrir su trabajo</button> <button class="btn del sm" onclick="confirmM('¿Borrar los datos de ${esc(c)}?','tDel(\\'${esc(c)}\\')')">Borrar</button></td></tr>`}).join('')||'<tr><td colspan=5>Ninguno todavía</td></tr>'}</table></div><p><button class="btn del" onclick="confirmM('¿Borrar los datos de TODOS los estudiantes de este equipo?','tDelAll()')">Borrar todos los datos de este equipo</button></p></div>
+    <div class="note">Este simulador está en blanco: los estudiantes crean la empresa, los terceros, los productos y los documentos a partir de las hojas que imprimes con el generador de documentos. Los datos de cada estudiante se guardan en su propio dispositivo; allí puede borrarlos en Configuración.</div></div>`}
 function tOpen(c){const us=users();doLogin(us[c].name,c)}
 function tDel(c){ls.del('pv2_d_'+c);const us=users();delete us[c];ls.set('pv2_users',JSON.stringify(us));closeM();render()}
 function tDelAll(){Object.keys(users()).forEach(c=>ls.del('pv2_d_'+c));ls.set('pv2_users','{}');closeM();render()}
