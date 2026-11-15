@@ -133,6 +133,11 @@ label{display:block;font-size:12px;color:var(--mut);margin:8px 0 3px}
 .wgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:22px 10px;padding:22px 20px 26px}.wgrid div{text-align:center;cursor:pointer;padding:6px;border-radius:10px}.wgrid div:hover{background:var(--b100)}
 .wgrid i{font-style:normal;display:flex;width:66px;height:66px;border-radius:50%;border:1px solid var(--b200);background:#fff;color:var(--b500);margin:0 auto 10px;align-items:center;justify-content:center;font-size:27px;box-shadow:0 1px 4px rgba(10,35,66,.1)}.wgrid span{font-size:13px;font-weight:600;color:var(--b900)}
 @media(max-width:900px){.side{width:100%!important;display:flex;flex-wrap:wrap}.fly{left:0;top:54px;width:100%}}
+
+.stabs{display:flex;flex-wrap:wrap;gap:2px;background:#e4eefa;border-radius:8px;padding:4px 6px;margin-bottom:14px}.stabs button{border:0;background:transparent;padding:9px 16px;cursor:pointer;color:var(--b900);font-size:13.5px;border-radius:6px;border-top:3px solid transparent}.stabs button:hover{background:#f2f7fd}.stabs button.on{background:#fff;color:var(--b600);font-weight:600;border-top-color:var(--b500)}
+.sbox{position:relative;width:340px;max-width:100%}.sbox span{position:absolute;left:12px;top:5px;color:var(--b600);font-size:17px}.sbox input{padding-left:34px!important;width:100%!important;border-radius:8px}
+.mfil{display:flex;gap:8px;align-items:center;background:#fff;border:1px solid var(--b200);border-top:0;padding:8px 14px}.mfil input{width:150px}.mfil label{margin:0}
+.lnk{color:var(--b600);cursor:pointer}a.lnk:hover{text-decoration:underline}.lst small{font-size:11.5px}
 </style>
 </head>
 <body>
@@ -293,6 +298,7 @@ function render(){
   const t={inicio:'Inicio',terceros:tab==='cliente'?'Clientes':'Proveedores',inventario:'Productos y existencias',empleados:'Empleados',glosario:'Glosario contable',conc:'Conciliación bancaria',reportes:'Reportes',config:'Configuración',plan:'Plan de cuentas',rete:'Retención en la fuente'};
   const body=view==='inicio'?vInicio():view==='terceros'?vTerceros():view==='inventario'?vInventario():view==='empleados'?vEmpleados():TIPOS[view]?vDocs(view):view==='conc'?vConc():view==='reportes'?vReportes():view==='glosario'?vGlosario():view==='plan'?vPlan():view==='rete'?vRete():vConfig();
   const cm=modOf();
+  const stabs=cm&&cm.items?`<div class="stabs">${cm.items.map(x=>`<button class="${leafOn(x[0])?'on':''}" onclick="go('${x[0]}')">${x[1]}</button>`).join('')}</div>`:'';
   const side=`<div class="rl" title="Volver al portal" onclick="go('portal')"><i>←</i><span>Portal</span></div><hr>`+MENU.map(m=>{const on=cm&&cm.id===m.id,open=openM===m.id;
     return `<div class="rl ${on?'on':''} ${open?'op':''}" title="${m.n}" onclick="event.stopPropagation();${m.v?`go('${m.v}')`:`openM=${open?'null':`'${m.id}'`};crOpen=false;pdOpen=false;render()`}"><i>${m.i}</i><span>${m.n}</span></div>`}).join('');
   const fm=openM?MENU.find(m=>m.id===openM):null;
@@ -313,7 +319,7 @@ function render(){
   <span class="ib" title="Configuración" onclick="go('config')">⚙</span>
   <div class="pdd"><span class="av" onclick="event.stopPropagation();pdOpen=pdOpen==='u'?false:'u';crOpen=false;render()">${esc(ini)}</span>${usr}</div></div></div>
   <div class="wrap" onclick="if(openM||crOpen||pdOpen){openM=null;crOpen=false;pdOpen=false;render()}"><div class="side">${side}</div>${fly}
-  <div class="main"><div class="top"><div><div class="crumb">${cm?cm.n:''} ${view!=='inicio'?'› <b>'+ttl+'</b>':''}</div><h2>${ttl}</h2><div class="emp">${S.empresa.nombre?esc(S.empresa.nombre)+' · NIT '+esc(S.empresa.nit):'Empresa sin configurar'} · Empresa ${U.emp}</div></div></div>${guideBox()}${body}</div></div>`;
+  <div class="main"><div class="top"><div><div class="crumb">${cm?cm.n:''} ${view!=='inicio'?'› <b>'+ttl+'</b>':''}</div><h2>${cm&&cm.items?cm.n:ttl}</h2><div class="emp">${S.empresa.nombre?esc(S.empresa.nombre)+' · NIT '+esc(S.empresa.nit):'Empresa sin configurar'} · Empresa ${U.emp}</div></div></div>${stabs}${guideBox()}${body}</div></div>`;
 }
 let srOpen=false;
 let pdOpen=false;
@@ -386,16 +392,26 @@ function kardex(id){const {K}=D(),rows=K[id]||[];modal(`<h3>Kárdex · ${esc(pro
 /* ---------- Documentos ---------- */
 function ivaCard(J){const g=-bal(J,'240801'),d=bal(J,'240802'),n=g-d;
   return `<div class="grid"><div class="kpi"><span>IVA generado pendiente</span><b>${fmt(g)}</b></div><div class="kpi"><span>IVA descontable pendiente</span><b>${fmt(d)}</b></div><div class="kpi"><span>${n>=0?'IVA a pagar':'Saldo a favor'}</span><b>${fmt(Math.abs(n))}</b></div><div class="kpi"><span>Saldo a favor acumulado</span><b>${fmt(bal(J,'135517'))}</b></div></div>`}
-function fRows(){const q=($('#fq').value||'').toLowerCase(),a=$('#fd1').value,b=$('#fd2').value;let n=0,sm=0;document.querySelectorAll('#lst tr[data-q]').forEach(r=>{const ok=(!q||r.dataset.q.includes(q))&&(!a||r.dataset.f>=a)&&(!b||r.dataset.f<=b);r.style.display=ok?'':'none';if(ok){n++;sm+=+r.dataset.v}});$('#fcnt').textContent=n+' documento(s)';$('#fsum').textContent='Total: '+fmt(sm)}
+function fRows(){const q=($('#fq').value||'').toLowerCase(),a=$('#fd1').value,b=$('#fd2').value;let n=0,sm=0;document.querySelectorAll('#lst tr[data-q]').forEach(r=>{const ok=(!q||r.dataset.q.includes(q))&&(!a||r.dataset.f>=a)&&(!b||r.dataset.f<=b);r.style.display=ok?'':'none';if(ok){n++;sm+=+r.dataset.v}});$('#fcnt').textContent='Mostrando '+n+' de '+$('#fcnt').dataset.t;$('#fsum').textContent='Total: '+fmt(sm)}
+const MES=['ene.','feb.','mar.','abr.','may.','jun.','jul.','ago.','sep.','oct.','nov.','dic.'];
+const fDate=f=>{const p=String(f).split('-');return p.length<3?f:(+p[2])+' '+MES[+p[1]-1]+' '+p[0]};
+function saldoMap(J,t){const cta=t==='FV'?'130505':'220505',m={},pay={};
+  J.filter(x=>x.c===cta&&x.ter).forEach(x=>{const mine=t==='FV'?x.de:x.ha,other=t==='FV'?x.ha:x.de;pay[x.ter]=(pay[x.ter]||0)+(x.d.tipo===t?0:other)});
+  J.filter(x=>x.c===cta&&x.ter&&x.d.tipo===t).sort((a,b)=>a.fecha.localeCompare(b.fecha)||a.d.seq-b.d.seq).forEach(x=>{const v=t==='FV'?x.de:x.ha;let p=pay[x.ter]||0;const ap=Math.min(p,v);pay[x.ter]=p-ap;m[x.d.id]=v-ap});
+  return m}
 function vDocs(t){
   const {W,J}=D(),L=S.docs.filter(d=>d.tipo===t&&!d.ini).sort((a,b)=>a.fecha.localeCompare(b.fecha)||a.seq-b.seq);
+  const hasSal=t==='FV'||t==='FC',SM=hasSal?saldoMap(J,t):{};
   const col=d=>d.tipo==='NO'?d.emps.length+' empleado(s)'+(d.exon?' · exonerada':''):d.tipo==='PN'?esc(d.concepto||''):d.tipo==='AF'?esc(d.nombre)+' · '+d.vida+' meses':d.tipo==='DP'?'Depreciación causada':d.tipo==='BA'?esc(d.concepto||''):['FV','FC','GA'].includes(d.tipo)?(d.pago==='credito'?'Crédito '+(d.dias||30)+' días':'Contado'):d.tipo==='CZ'?'Oferta de precio':d.tipo==='NV'||d.tipo==='NP'?(d.pago==='credito'?'Abona a cuenta':'Efectivo'):esc(d.concepto||'');
   const est=d=>W[d.id]?`<span class="badge w" title="${esc(W[d.id])}">Revisar</span>`:d.tipo==='CZ'?(d.fact?`<span class="badge ok">Facturada ${d.fact}</span>`:'<span class="badge cz">Pendiente</span>'):'<span class="badge ok">Contabilizado</span>';
   const tot=d=>['DP','DI','CI'].includes(d.tipo)?J.filter(x=>x.d.id===d.id).reduce((s,x)=>s+x.de,0):docTotal(d);
-  const nom=d=>SINTER.includes(t)?esc(d.concepto||''):esc(ter(d.ter).nombre);
-  return `${t==='DI'?ivaCard(J):''}<div class="toolbar"><input id="fq" type="text" placeholder="Buscar por número, tercero o concepto" oninput="fRows()"><label>Desde</label><input id="fd1" type="date" onchange="fRows()"><label>Hasta</label><input id="fd2" type="date" onchange="fRows()"><span class="sp"></span>${L.length?`<button class="btn del" onclick="delAll('${t}')">Eliminar todos (${L.length})</button>`:''}<button class="btn" onclick="newDoc('${t}')">+ Crear ${TIPOS[t].toLowerCase()}</button></div>
-  <div class="tw" style="border-radius:0;border-top:0"><table class="lst" id="lst"><tr><th>Número</th><th>Fecha</th><th>${SINTER.includes(t)?'Concepto':'Tercero'}</th><th>Detalle</th><th>Estado</th><th class="r">Total</th><th></th></tr>${L.map(d=>`<tr data-q="${esc((d.num+' '+nom(d)+' '+(d.concepto||'')+' '+(d.numProv||'')).toLowerCase())}" data-f="${d.fecha}" data-v="${tot(d)}"><td><b>${d.num}</b></td><td>${d.fecha}</td><td>${nom(d)}</td><td>${col(d)}</td><td>${est(d)}</td><td class="r">${fmt(tot(d))}</td><td class="r">${t==='CZ'&&!d.fact?`<button class="btn sm" onclick="convertQ('${d.id}')">Facturar</button> `:''}<button class="btn sec sm" onclick="viewDoc('${d.id}')">Ver</button> <button class="btn del sm" onclick="askDel('${d.id}')">Eliminar</button></td></tr>`).join('')||'<tr><td colspan=7>Aún no has registrado documentos aquí. Pulsa «+ Crear» para empezar.</td></tr>'}</table></div>
-  <div class="lstf"><span id="fcnt">${L.length} documento(s)</span><span id="fsum">Total: ${fmt(L.reduce((s,d)=>s+tot(d),0))}</span></div>`}
+  const nom=d=>SINTER.includes(t)?esc(d.concepto||''):`<span class="lnk">${esc(ter(d.ter).nombre)}</span><br><small class="emp">${esc(ter(d.ter).doc||'')}</small>`;
+  const sal=d=>{const v=SM[d.id]||0;return v>0?`${fmt(v)}<br><span class="badge cz">Pendiente</span>`:`${fmt(0)}<br><span class="badge ok">Pagada</span>`};
+  const nc=hasSal?8:7,cr={FV:'factura',FC:'factura',CZ:'cotización',NV:'nota crédito',NP:'nota crédito',GA:'documento',RC:'recibo',CE:'comprobante'}[t]||'documento';
+  return `${t==='DI'?ivaCard(J):''}<div class="toolbar"><div class="sbox"><span>⌕</span><input id="fq" type="text" placeholder="Buscar por número, tercero o concepto" oninput="fRows()"></div><button class="btn sec" onclick="const e=$('#mf');e.style.display=e.style.display==='none'?'flex':'none'">☰ Más filtros</button><span class="sp"></span>${L.length?`<button class="btn del" onclick="delAll('${t}')">Eliminar todos (${L.length})</button>`:''}<button class="btn sec" onclick="go('reportes')">Ver reportes ▾</button><button class="btn" onclick="newDoc('${t}')">Crear ${cr}</button></div>
+  <div id="mf" class="mfil" style="display:none"><label>Desde</label><input id="fd1" type="date" onchange="fRows()"><label>Hasta</label><input id="fd2" type="date" onchange="fRows()"></div>
+  <div class="tw" style="border-radius:0;border-top:0"><table class="lst" id="lst"><tr><th>Fecha</th><th>Comprobante</th><th>${SINTER.includes(t)?'Concepto':t==='FC'||t==='NP'||t==='GA'||t==='CE'?'Proveedor':'Cliente'}</th>${SINTER.includes(t)?'':'<th>Detalle</th>'}<th class="r">Total</th>${hasSal?'<th class="r">Saldo</th>':''}<th>Estado</th><th>Acciones</th></tr>${L.map(d=>`<tr data-q="${esc((d.num+' '+(SINTER.includes(t)?d.concepto||'':ter(d.ter).nombre+' '+(ter(d.ter).doc||''))+' '+(d.concepto||'')+' '+(d.numProv||'')).toLowerCase())}" data-f="${d.fecha}" data-v="${tot(d)}"><td>${fDate(d.fecha)}</td><td><a class="lnk" onclick="viewDoc('${d.id}')">${d.num}</a><br><small class="emp">${TIPOS[t]}</small></td><td>${nom(d)}</td>${SINTER.includes(t)?'':`<td>${col(d)}</td>`}<td class="r">${fmt(tot(d))}</td>${hasSal?`<td class="r">${sal(d)}</td>`:''}<td>${est(d)}</td><td>${t==='CZ'&&!d.fact?`<button class="btn sm" onclick="convertQ('${d.id}')">Facturar</button> `:''}<button class="btn sec sm" onclick="viewDoc('${d.id}')">Ver</button> <button class="btn del sm" onclick="askDel('${d.id}')">Eliminar</button></td></tr>`).join('')||`<tr><td colspan=${nc}>Aún no has registrado documentos aquí. Pulsa «Crear ${cr}» para empezar.</td></tr>`}</table></div>
+  <div class="lstf"><span id="fcnt" data-t="${L.length}">Mostrando ${L.length} de ${L.length}</span><span id="fsum">Total: ${fmt(L.reduce((s,d)=>s+tot(d),0))}</span></div>`}
 function askDel(id){const d=S.docs.find(x=>x.id===id);modal(`<h3>¿Eliminar ${d.num}?</h3><p>Se borrará el documento y todos sus movimientos (inventario y contabilidad).</p><p><button class="btn" style="background:#b3261e" onclick="doDel('${id}')">Sí, eliminar</button> <button class="btn sec" onclick="closeM()">Cancelar</button></p>`)}
 function doDel(id){S.docs=S.docs.filter(d=>d.id!==id);save();closeM();render();toast('Documento eliminado')}
 function delAll(t){const n=S.docs.filter(d=>d.tipo===t&&!d.ini).length;modal(`<h3>¿Eliminar las ${n} ${PLUR[t].toLowerCase()}?</h3><p>Esta acción no se puede deshacer.</p><p><button class="btn" style="background:#b3261e" onclick="doDelAll('${t}')">Sí, eliminar todas</button> <button class="btn sec" onclick="closeM()">Cancelar</button></p>`)}
@@ -606,7 +622,7 @@ config:{t:'Configuración',q:'Aquí escribes los datos de tu empresa, guardas o 
 };
 function guideBox(){
   const k=view==='reportes'?'rep_'+rep:view,g=GUIDE[k];if(!g||!G.on||view==='inicio')return'';
-  return `<details class="gd" open><summary>Guía de este paso: ${g.t}</summary><h5>Para qué sirve</h5><p>${g.q}</p>${g.p?`<h5>Cómo se hace</h5><ol>${g.p.map(x=>`<li>${x}</li>`).join('')}</ol>`:''}${g.c?`<h5>Qué pasa contablemente</h5><p>${g.c}</p>`:''}${g.o?`<h5>Ojo con</h5><p>${g.o}</p>`:''}</details>`}
+  return `<details class="gd"><summary>Guía de este paso: ${g.t}</summary><h5>Para qué sirve</h5><p>${g.q}</p>${g.p?`<h5>Cómo se hace</h5><ol>${g.p.map(x=>`<li>${x}</li>`).join('')}</ol>`:''}${g.c?`<h5>Qué pasa contablemente</h5><p>${g.c}</p>`:''}${g.o?`<h5>Ojo con</h5><p>${g.o}</p>`:''}</details>`}
 function hintBox(t){
   if(!G.on)return'';const m=[];
   if(t==='FV'||t==='FC'||t==='GA')m.push(F.pago==='credito'?(t==='FV'?'A crédito: el cliente queda debiendo. El asiento carga la cuenta Clientes (130505) y la deuda se cobra después con un Recibo de caja.':'A crédito: tú quedas debiendo al proveedor. El asiento abona Proveedores (220505) y la deuda se paga después con un Comprobante de egreso.'):(t==='FV'?'De contado: el dinero entra ya a Caja o Bancos y no queda cartera.':'De contado: pagas en el acto, sale dinero de Caja o Bancos y no queda deuda.'));
