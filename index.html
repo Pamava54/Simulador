@@ -302,6 +302,7 @@ function loginView(){
   <div style="text-align:center;color:#8aa;font-size:11px;margin-top:10px">PAMAVA Soluciones</div></div>`}
 
 /* ---------- Inicio ---------- */
+let inTab='res';
 function vInicio(){
   const {J,st}=D(),k=kpis(J,st,S.productos),e=S.empresa,Jn=Jnc(J),kn=kpis(Jn,st,S.productos);
   const has=t=>S.docs.some(d=>d.tipo===t);
@@ -309,14 +310,15 @@ function vInicio(){
   const ruta=[['Configura los datos de tu empresa',!!e.nombre,'config'],['Registra el saldo inicial (comprobante contable)',has('CC'),'CC'],['Crea tus clientes y proveedores',S.terceros.length>0,'clientes'],['Crea tus productos',S.productos.length>0,'inventario'],['Registra las compras de mercancía',has('FC'),'FC'],['Registra las ventas',has('FV'),'FV'],['Registra cobros y pagos',has('RC')&&has('CE'),'RC'],['Registra los gastos del mes',has('GA'),'GA'],['Activos fijos y depreciación',has('AF')&&has('DP'),'AF'],['Crea empleados',S.empleados.length>0,'empleados'],['Liquida y paga la nómina',has('NO')&&has('PN'),'NO'],['Concilia el banco',Object.keys(S.conc||{}).length>0,'conc'],['Declara el IVA',has('DI'),'DI'],['Cierra el ejercicio',has('CI'),'CI']];
   const hecho=ruta.filter(x=>x[1]).length,pct=Math.round(hecho*100/ruta.length);
   const first=(U.name||'').split(' ')[0];
-  return `<div class="hero"><h3>Hola, ${esc(first)}</h3><p>${e.nombre?`<b>${esc(e.nombre)}</b> · NIT ${esc(e.nit)} · ${esc(e.actividad)}`:'Tu empresa está en blanco. Empieza por Configuración y sigue la ruta de abajo.'}</p></div>
+  const tabs=`<div class="tabs"><button class="${inTab==='res'?'on':''}" onclick="inTab='res';render()">Resumen</button><button class="${inTab==='map'?'on':''}" onclick="inTab='map';render()">Mapa de procesos</button></div>`;
+  if(inTab==='map')return tabs+flowMap(J);
+  return tabs+`<div class="hero"><h3>Hola, ${esc(first)}</h3><p>${e.nombre?`<b>${esc(e.nombre)}</b> · NIT ${esc(e.nit)} · ${esc(e.actividad)}`:'Tu empresa está en blanco. Empieza por Configuración y sigue la ruta de abajo.'}</p></div>
   <div class="sec2">Accesos rápidos</div>
   <div class="qa">${[['FV','Crear factura de venta','$'],['FC','Crear factura de compra','↓'],['RC','Registrar recibo de caja','✓'],['CE','Registrar pago a proveedor','↑'],['cli','Crear cliente','+'],['prod','Crear producto','▣'],['CC','Comprobante contable','≡'],['NO','Liquidar nómina','☺']].map(x=>`<div onclick="quick('${x[0]}')"><i>${x[2]}</i>${x[1]}</div>`).join('')}</div>
   <div class="sec2">Indicadores de tu empresa</div>
   <div class="grid">${kp.map(x=>`<div class="kpi"><span>${x[0]}</span><b>${fmt(x[1])}</b></div>`).join('')}</div>
   <div class="sec2">Tu ruta paso a paso <span class="emp">· ${hecho} de ${ruta.length} pasos (${pct}%)</span></div><div class="bar"><span style="width:${pct}%"></span></div>
   <div class="ruta">${ruta.map((x,i)=>`<div class="${x[1]?'ok':''}"><b>${x[1]?'✓':i+1}</b><span>${x[0]}</span><button class="btn sec sm" onclick="${x[2]==='clientes'?"go('clientes')":`go('${x[2]}')`}">Ir</button></div>`).join('')}</div>
-  <div style="height:14px"></div>${flowMap(J)}
   <div class="note">¿Te equivocaste? Elimina el documento y créalo de nuevo, o borra todo en <b>Configuración</b>. Los pasos se marcan solos cuando registras el documento.</div>`}
 
 /* ---------- Terceros ---------- */
