@@ -133,9 +133,9 @@ function derive(docs,prods){
     else if(d.tipo==='DP'){const mk=d.fecha.slice(0,7);
       if(meses[mk])W[d.id]='Ya existe una depreciación de este mes';
       else{meses[mk]=1;let n=0;const g={};
-        A.forEach(a=>{if(a.baja||a.fecha.slice(0,7)>=mk||a.n>=a.vida)return;let q=Math.round((a.costo-a.resid)/a.vida);q=Math.min(q,a.costo-a.resid-a.acum);if(q<=0)return;a.acum+=q;a.n++;n++;const kk=a.g+'|'+a.ac;g[kk]=(g[kk]||0)+q});
+        A.forEach(a=>{if(a.baja||a.fecha.slice(0,7)>mk||a.n>=a.vida)return;let q=Math.round((a.costo-a.resid)/a.vida);q=Math.min(q,a.costo-a.resid-a.acum);if(q<=0)return;a.acum+=q;a.n++;n++;const kk=a.g+'|'+a.ac;g[kk]=(g[kk]||0)+q});
         Object.keys(g).sort().forEach(kk=>{const p=kk.split('|');ln(d,p[0],g[kk],0)});Object.keys(g).sort().forEach(kk=>{const p=kk.split('|');ln(d,p[1],0,g[kk])});
-        if(!n)W[d.id]='No hay activos por depreciar en este mes (se deprecia desde el mes siguiente a la compra)'}}
+        if(!n)W[d.id]='No hay activos por depreciar en este mes (se deprecia desde el mes de la compra)'}}
     else if(d.tipo==='BA'){const a=Am[d.activo];
       if(!a)W[d.id]='El activo ya no existe';else if(a.baja)W[d.id]='Este activo ya fue dado de baja';else if(a.fecha>d.fecha)W[d.id]='La fecha es anterior a la compra del activo';
       else{const v=Math.round(+d.valor||0),lib=a.costo-a.acum,df=v-lib;
@@ -148,8 +148,8 @@ function derive(docs,prods){
 }
 const bal=(J,pre)=>J.filter(x=>x.c.startsWith(pre)).reduce((s,x)=>s+x.de-x.ha,0);
 function kpis(J,st,prods){let inv=0;prods.forEach(p=>{const s=st[p.id];if(s)inv+=s.q*s.c});
-  const ventas=-bal(J,'4'),cv=bal(J,'6'),gas=bal(J,'5');
-  return{ventas,costoVentas:cv,gastos:gas,utilidad:ventas-cv-gas,bancos:bal(J,'111005'),caja:bal(J,'110505'),clientes:bal(J,'130505'),proveedores:-bal(J,'220505'),inventario:bal(J,'143505'),ivaPagar:-(bal(J,'240801')+bal(J,'240802'))}}
+  const ventas=-bal(J,'41'),cv=bal(J,'6'),gas=bal(J,'5');
+  return{ventas,costoVentas:cv,gastos:gas,utilidad:-bal(J,'4')-cv-gas,bancos:bal(J,'111005'),caja:bal(J,'110505'),clientes:bal(J,'130505'),proveedores:-bal(J,'220505'),inventario:bal(J,'143505'),ivaPagar:-(bal(J,'240801')+bal(J,'240802'))}}
 
 /* ---------- Estado ---------- */
 let U=null,S=null,view='inicio',rep='bp',repAcc='413595',tab='cliente',F=null,TP={txt:'',msg:''},teacher=false,teacherOK=false;
@@ -189,7 +189,7 @@ function loginView(){
   <label>Nombre completo (como aparece en tu hoja)</label><input id="ln" value="${last?esc(last.name):''}" placeholder="Ej: Ana María Pérez Gómez">
   <label>Contraseña de tu empresa (está en tu hoja de documentos)</label><input id="lp" type="password" placeholder="Ej: K7M2X" onkeydown="if(event.key==='Enter')login()">
   <p style="margin-top:14px"><button class="btn" onclick="login()">Entrar a mi empresa</button> <button class="btn sec" onclick="teacherLogin()">Soy profesor</button></p>
-  <div class="note">Tus datos se guardan en este mismo dispositivo y navegador. Si cambias de equipo, empezarás con tu empresa en blanco.</div>
+  <div class="note">Tu trabajo se guarda automáticamente en este equipo y navegador. Si no terminas en clase, vuelve al mismo computador y navegador, o descarga tu archivo en <b>Configuración → Guardar mi trabajo</b> para continuar en cualquier equipo.</div>
   <div style="text-align:center;color:#8aa;font-size:11px;margin-top:10px">PAMAVA Soluciones</div></div>`}
 
 /* ---------- Inicio ---------- */
@@ -340,8 +340,13 @@ function edadHTML(J){
 
 /* ---------- Configuración ---------- */
 function vConfig(){const e=S.empresa;return `<div class="card"><b>Datos de la empresa</b><p class="emp">Escribe aquí los datos de tu empresa tal como aparecen en tus documentos.</p><div class="row"><div><label>Nombre o razón social</label><input id="e1" value="${esc(e.nombre)}"></div><div><label>NIT</label><input id="e2" value="${esc(e.nit)}"></div><div><label>Actividad</label><input id="e3" value="${esc(e.actividad)}"></div></div><div class="row"><div><label>Dirección</label><input id="e4" value="${esc(e.dir)}"></div><div><label>Teléfono</label><input id="e5" value="${esc(e.tel)}"></div></div><p><button class="btn" onclick="saveEmp()">Guardar datos</button></p></div>
+  <div class="card"><b>Guardar y recuperar mi trabajo</b><p>Tu trabajo se guarda solo en este equipo y navegador. Si vas a continuar en otro computador (o no estás seguro de volver al mismo), descarga tu archivo al terminar la clase y guárdalo en tu USB, correo o Drive. Al volver, entra con tu nombre y contraseña y recupéralo aquí.</p><button class="btn" onclick="exportar()">Guardar mi trabajo (descargar archivo)</button> <button class="btn sec" onclick="$('#imp').click()">Recuperar mi trabajo (subir archivo)</button><input type="file" id="imp" accept=".json" style="display:none" onchange="importar(event)"></div>
   <div class="card"><b>Borrar solo los documentos</b><p>Elimina facturas, recibos, egresos y comprobantes. Conserva datos de la empresa, terceros y productos. Ideal para repetir la práctica.</p><button class="btn del" onclick="confirmM('¿Borrar todos tus documentos?','resetDocs()')">Borrar todos los documentos</button></div>
   <div class="card"><b>Dejar mi empresa totalmente en blanco</b><p>Borra todo: datos de la empresa, terceros, productos y documentos.</p><button class="btn del" onclick="confirmM('¿Borrar todo y dejar la empresa en blanco?','resetAll()')">Borrar todo</button></div>`}
+let IMP=null;
+function exportar(){const o={pamava:1,name:U.name,emp:U.emp,code:U.code,fecha:new Date().toISOString(),S};const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(o)],{type:'application/json'}));a.download='PAMAVA_'+U.name.replace(/[^A-Za-z0-9]+/g,'_')+'_Empresa'+U.emp+'.json';document.body.appendChild(a);a.click();a.remove();toast('Archivo descargado: guárdalo en tu USB, correo o Drive')}
+function importar(ev){const f=ev.target.files[0];ev.target.value='';if(!f)return;const r=new FileReader();r.onload=()=>{try{const o=JSON.parse(r.result);if(!o.pamava||!o.S)return toast('Este archivo no es un trabajo de PAMAVA');if(o.code!==U.code)return toast('Este archivo es de otra empresa u otro estudiante');IMP=o.S;confirmM('¿Reemplazar tu trabajo actual por el del archivo guardado el '+String(o.fecha).slice(0,10)+'?','aplicarImp()')}catch(e){toast('Archivo no válido')}};r.readAsText(f)}
+function aplicarImp(){S=IMP;S.code=U.code;save();closeM();view='inicio';render();toast('Trabajo recuperado')}
 function saveEmp(){S.empresa={nombre:$('#e1').value.trim(),nit:$('#e2').value.trim(),actividad:$('#e3').value.trim(),dir:$('#e4').value.trim(),tel:$('#e5').value.trim()};save();toast('Datos guardados');render()}
 function confirmM(t,fn){modal(`<h3>${t}</h3><p>Esta acción no se puede deshacer.</p><p><button class="btn" style="background:#b3261e" onclick="${fn}">Sí, continuar</button> <button class="btn sec" onclick="closeM()">Cancelar</button></p>`)}
 function resetDocs(){S.docs=[];S.cons=CONS0();S.conc={};S.extracto=0;save();closeM();view='inicio';render();toast('Documentos borrados')}
@@ -384,10 +389,10 @@ rep_car:{t:'Cartera',q:'Muestra cuánto te deben los clientes y cuánto les debe
 rep_edad:{t:'Cartera por edades',q:'Clasifica cada deuda según los días que lleva vencida. Mientras más antigua, más riesgo de no cobrarla. El vencimiento es la fecha del documento más el plazo en días.',p:['Elige Clientes o Proveedores.','Cambia la fecha de corte para ver cómo envejece la deuda.']},
 rep_inv:{t:'Inventario',q:'Existencias, costo promedio y valor total de cada producto. La suma del valor debe coincidir con la cuenta Inventario (143505).'},
 AF:{t:'Compra de activos fijos',q:'Un activo fijo es un bien que usas varios años para trabajar (computador, mueble, vehículo, maquinaria). No es un gasto: entra como activo y se va desgastando poco a poco con la depreciación.',p:['Pulsa Crear compra de activo fijo.','Elige el proveedor, la fecha y la forma de pago.','Escribe el nombre del activo y elige su tipo: el sistema propone la vida útil.','Escribe el valor de compra, el IVA, la vida útil en meses y el valor residual (lo que valdrá al final; puede ser 0).','Guarda y revisa el asiento con Ver.'],c:'Débito al activo (por ejemplo 152805 Equipos de procesamiento de datos) y a IVA descontable. Crédito a Proveedores si queda a crédito, o a Caja o Bancos si es de contado.',o:'Un computador de 3 millones NO se lleva a gastos: se activa y se deprecia. Aquí el IVA se trata como descontable para simplificar.'},
-DP:{t:'Depreciación mensual',q:'La depreciación reparte el costo de un activo entre los meses de su vida útil. Cada mes una parte del activo se convierte en gasto.',p:['Pulsa Crear depreciación mensual.','Escribe la fecha del último día del mes que vas a depreciar.','Mira la vista previa: muestra el asiento que se generará con todos tus activos.','Guarda. Haz una depreciación por mes, en orden.'],c:'Débito al gasto de depreciación (5160xx) y crédito a la depreciación acumulada (1592xx). La cuota es (Costo − Valor residual) ÷ Vida útil en meses (método de línea recta).',o:'Se deprecia desde el mes siguiente a la compra. Solo puede haber una depreciación por mes, y un activo deja de depreciarse cuando termina su vida útil.'},
+DP:{t:'Depreciación mensual',q:'La depreciación reparte el costo de un activo entre los meses de su vida útil. Cada mes una parte del activo se convierte en gasto.',p:['Pulsa Crear depreciación mensual.','Escribe la fecha del último día del mes que vas a depreciar.','Mira la vista previa: muestra el asiento que se generará con todos tus activos.','Guarda. Haz una depreciación por mes, en orden.'],c:'Débito al gasto de depreciación (5160xx) y crédito a la depreciación acumulada (1592xx). La cuota es (Costo − Valor residual) ÷ Vida útil en meses (método de línea recta).',o:'Se deprecia desde el mes de la compra (mes completo). Solo puede haber una depreciación por mes, y un activo deja de depreciarse cuando termina su vida útil.'},
 BA:{t:'Baja o venta de activos',q:'Se usa cuando un activo se vende o se retira porque ya no sirve. Se saca de los libros con su depreciación acumulada.',p:['Pulsa Crear baja o venta de activo.','Elige el activo y la fecha.','Escribe el valor de venta (0 si solo se da de baja).','Revisa la vista previa: dice si hay utilidad o pérdida y guarda.'],c:'Se cancela el activo (crédito) y su depreciación acumulada (débito). Si lo vendes, entra dinero a Caja o Bancos. Si vendes por más que su valor en libros, hay utilidad (424505); si es por menos, hay pérdida (531005).',o:'Valor en libros = Costo − Depreciación acumulada. Compara esa cifra con el precio de venta. Depreciación pendiente: registra primero las depreciaciones hasta la fecha de venta.'},
 rep_af:{t:'Activos fijos',q:'Lista todos tus activos con su costo, la cuota mensual, los meses depreciados, la depreciación acumulada y el valor en libros. El total del valor en libros debe coincidir con las cuentas 15 del balance.',o:'Valor en libros = Costo − Depreciación acumulada. Al final de la vida útil el valor en libros es igual al valor residual.'},
-config:{t:'Configuración',q:'Aquí escribes los datos de tu empresa y puedes borrar documentos o todo para repetir la práctica desde cero.'}
+config:{t:'Configuración',q:'Aquí escribes los datos de tu empresa, guardas o recuperas tu trabajo en un archivo, y puedes borrar documentos o todo para repetir la práctica desde cero.',o:'Al terminar cada clase pulsa Guardar mi trabajo y conserva el archivo: así puedes continuar en cualquier computador.'}
 };
 function guideBox(){
   const k=view==='reportes'?'rep_'+rep:view,g=GUIDE[k];if(!g||!G.on)return'';
@@ -404,7 +409,7 @@ function hintBox(t){
   if(t==='GA')m.push('El gasto aparecerá en el Estado de resultados, en la cuenta que elijas.');
   if(t==='CC')m.push('Cada línea es Débito o Crédito, nunca las dos. Débitos y créditos deben sumar lo mismo.');
   if(t==='AF')m.push('Un activo fijo se compra para usarlo varios años: no es un gasto. Su costo se reparte después con la depreciación mensual.');
-  if(t==='DP')m.push('Una depreciación por mes. Se depreciará cada activo comprado en meses anteriores, hasta que termine su vida útil.');
+  if(t==='DP')m.push('Una depreciación por mes. Se depreciará cada activo comprado en ese mes o antes, hasta que termine su vida útil.');
   if(t==='BA')m.push('Valor en libros = costo − depreciación acumulada. Si lo vendes por más hay utilidad; por menos, pérdida. Registra antes las depreciaciones hasta la fecha de venta.');
   if(t==='CZ')m.push('Una cotización no afecta la contabilidad ni el inventario hasta que se factura.');
   return m.length?`<div class="hint">${m.join('<br>')}</div>`:''}
