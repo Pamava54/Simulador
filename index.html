@@ -170,6 +170,26 @@ label{display:block;font-size:12px;color:var(--mut);margin:8px 0 3px}
 .rq{color:#e0245e}.ck2{display:flex;gap:8px;align-items:center;margin:6px 0;color:var(--b600);font-size:14px;cursor:pointer}.ck2 input{width:auto}.fis{margin:4px 0}.cd{display:inline-block;width:52px;font-weight:600}
 @media(max-width:900px){.g2,.cg{grid-template-columns:1fr}}
 .tt .big{white-space:nowrap;gap:10px}.tt .big span{font-size:16px}.tt .big b{flex:none}
+
+.pwel{background:linear-gradient(120deg,#0b2f5e 0%,#1f5fae 55%,#3d8de0 100%)!important;border:0!important;padding:34px 34px 38px!important;position:relative;overflow:hidden}
+.pwel::before{content:"";position:absolute;right:-60px;top:-90px;width:300px;height:300px;border-radius:50%;background:rgba(255,255,255,.08)}
+.pwel::after{content:"";position:absolute;right:170px;bottom:-110px;width:220px;height:220px;border-radius:50%;background:rgba(255,255,255,.07)}
+.pwel h1{color:#fff!important;font-weight:700!important;font-size:30px!important;letter-spacing:-.3px;position:relative;z-index:1}.pwel p{color:#d6e6fa!important;font-size:15px;position:relative;z-index:1}
+.pgrid{grid-template-columns:repeat(auto-fill,minmax(270px,1fr))!important;gap:26px!important;padding:30px 34px!important;margin-top:-22px;position:relative;z-index:2}
+.pc{border-radius:20px!important;border:1px solid rgba(255,255,255,.7);box-shadow:0 10px 30px rgba(15,50,100,.14)!important;transition:transform .22s,box-shadow .22s!important}
+.pc:hover{transform:translateY(-8px)!important;box-shadow:0 20px 44px rgba(31,95,174,.32)!important}
+.pc .im{height:140px!important;position:relative;overflow:hidden;font-size:0!important}
+.pc .im::before{content:"";position:absolute;left:-30px;bottom:-60px;width:170px;height:170px;border-radius:50%;background:rgba(255,255,255,.12)}
+.pc .im::after{content:"";position:absolute;right:-20px;top:-50px;width:130px;height:130px;border-radius:50%;background:rgba(255,255,255,.10)}
+.pc .im svg{position:relative;z-index:1;padding:16px;box-sizing:content-box;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.35);border-radius:22px;backdrop-filter:blur(4px);box-shadow:0 8px 20px rgba(0,0,0,.18);transition:transform .25s}
+.pc:hover .im svg{transform:scale(1.1) rotate(-4deg)}
+.pc:nth-child(1) .im{background:linear-gradient(135deg,#0b3d91,#2e7de0)!important}
+.pc:nth-child(2) .im{background:linear-gradient(135deg,#0f766e,#22b8a6)!important}
+.pc:nth-child(3) .im{background:linear-gradient(135deg,#6d28d9,#a78bfa)!important}
+.pc:nth-child(4) .im{background:linear-gradient(135deg,#0e7490,#38bdf8)!important}
+.pc:nth-child(5) .im{background:linear-gradient(135deg,#1d4ed8,#6366f1)!important}
+.pc .tx{padding:18px 20px 20px!important}.pc h4{font-size:18px!important;font-weight:700}.pc p{line-height:1.45;min-height:56px}
+.pc .go{display:inline-flex;gap:6px;align-items:center;margin-top:10px;color:var(--b600);font-weight:600;font-size:13.5px}.pc .go b{transition:transform .2s}.pc:hover .go b{transform:translateX(5px)}
 </style>
 </head>
 <body>
@@ -358,13 +378,13 @@ function render(){
 let srOpen=false;
 let pdOpen=false;
 function portalView(){
-  const c=(i,t,d,v,x)=>`<div class="pc" onclick="${x||`go('${v}')`}"><div class="im">${i}</div><div class="tx"><h4>${t}</h4><p>${d}</p></div></div>`;
+  const c=(i,t,d,v,x)=>`<div class="pc" onclick="${x||`go('${v}')`}"><div class="im">${i}</div><div class="tx"><h4>${t}</h4><p>${d}</p><span class="go">Abrir <b>\u2192</b></span></div></div>`;
   return `<div class="pt" onclick="if(pdOpen){pdOpen=false;render()}"><div class="prail"><div class="on" title="Inicio">⌂</div><div title="Mi empresa" onclick="go('inicio')">▤</div><div title="Aprendizaje" onclick="go('glosario')">☺</div><div title="Guardar mi trabajo" onclick="go('config')">⚙</div></div>
   <div class="pmain"><div class="phead"><div class="brand"><b>PAMAVA</b><small>Soluciones</small></div><span class="tit">Portal del estudiante</span><span class="sp"></span>
    <div class="pdd"><button onclick="event.stopPropagation();pdOpen=pdOpen==='a'?false:'a';render()">Ayuda ▾</button>${pdOpen==='a'?`<div class="menu" onclick="event.stopPropagation()"><div onclick="pdOpen=false;go('glosario')">Glosario contable</div><div onclick="pdOpen=false;toggleG()">${G.on?'Desactivar':'Activar'} las guías paso a paso</div><div onclick="pdOpen=false;inTab='map';go('inicio')">Mapa de procesos</div></div>`:''}</div>
    <div class="pdd"><button onclick="event.stopPropagation();pdOpen=pdOpen==='u'?false:'u';render()">${esc(U.name.toUpperCase().slice(0,22))} ▾</button>${pdOpen==='u'?`<div class="menu" onclick="event.stopPropagation()"><div onclick="pdOpen=false;go('config')">Guardar o recuperar mi trabajo</div><div onclick="logout()">Salir</div></div>`:''}</div></div>
   <div class="pwel"><h1>Hola ${esc(U.name.split(' ')[0].toUpperCase())}, te damos la bienvenida</h1><p>Administra tu empresa de práctica desde el portal del estudiante. ¿Qué deseas hacer?</p></div>
-  <div class="pgrid">${c('▤','Mi empresa','Entra a tu empresa: facturas, inventario, nómina, impuestos y reportes.','inicio')}${c('✓','Mi ruta paso a paso','Mira qué has hecho y qué sigue, desde el saldo inicial hasta el cierre.','','inTab=\'rut\';go(\'inicio\')')}${c('☺','Aprendizaje','Glosario y guías simples para entender cada documento y cada asiento.','glosario')}${c('▣','Mapa de procesos','Ve cómo se conectan compras, ventas, nómina, activos e impuestos.','','inTab=\'map\';go(\'inicio\')')}${c('⚙','Guardar mi trabajo','Descarga tu archivo para continuar en otro equipo, o empieza de cero.','config')}</div></div></div>`}
+  <div class="pgrid">${c('<svg viewBox="0 0 48 48" width="54" height="54" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 20 10 9h28l4 11"/><path d="M6 20c0 3 2.5 5 5.3 5S16.5 23 16.5 20c0 3 2.5 5 5.8 5s5.8-2 5.8-5c0 3 2.5 5 5.3 5S42 23 42 20"/><path d="M9 26v13h30V26"/><path d="M20 39V31h8v8"/></svg>','Mi empresa','Entra a tu empresa: facturas, inventario, nómina, impuestos y reportes.','inicio')}${c('<svg viewBox="0 0 48 48" width="54" height="54" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="36" r="4"/><circle cx="36" cy="12" r="4"/><path d="M16 36h12a6 6 0 0 0 0-12H20a6 6 0 0 1 0-12h12"/></svg>','Mi ruta paso a paso','Mira qué has hecho y qué sigue, desde el saldo inicial hasta el cierre.','','inTab=\'rut\';go(\'inicio\')')}${c('<svg viewBox="0 0 48 48" width="54" height="54" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M24 12c-4-3-10-4-16-3v27c6-1 12 0 16 3 4-3 10-4 16-3V9c-6-1-12 0-16 3Z"/><path d="M24 12v27"/></svg>','Aprendizaje','Glosario y guías simples para entender cada documento y cada asiento.','glosario')}${c('<svg viewBox="0 0 48 48" width="54" height="54" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="17" y="5" width="14" height="10" rx="2"/><rect x="4" y="33" width="14" height="10" rx="2"/><rect x="30" y="33" width="14" height="10" rx="2"/><path d="M24 15v8M11 33v-6h26v6"/></svg>','Mapa de procesos','Ve cómo se conectan compras, ventas, nómina, activos e impuestos.','','inTab=\'map\';go(\'inicio\')')}${c('<svg viewBox="0 0 48 48" width="54" height="54" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M14 34a9 9 0 0 1-1-17.8A12 12 0 0 1 36 18a8 8 0 0 1 0 16"/><path d="M24 40V26M18 31l6-6 6 6"/></svg>','Guardar mi trabajo','Descarga tu archivo para continuar en otro equipo, o empieza de cero.','config')}</div></div></div>`}
 function quick(k){crOpen=false;
   if(k==='cli'){tab='cliente';view='terceros';render();formTer()}
   else if(k==='pro'){tab='proveedor';view='terceros';render();formTer()}
