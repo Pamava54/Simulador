@@ -453,12 +453,30 @@ function loginView(){
 
 /* ---------- Inicio ---------- */
 let inTab='acc';
+function chartV(labels,series,cols,names){const W=640,H=230,pl=64,pb=28,pt=14,mx=Math.max(1,...series.flat().map(v=>Math.abs(v))),n=labels.length,gw=(W-pl-10)/Math.max(1,n),bw=Math.min(34,gw/(series.length+1)),y=v=>pt+(H-pt-pb)*(1-Math.max(0,v)/mx);
+  const grid=[0,.25,.5,.75,1].map(f=>{const v=mx*f,yy=pt+(H-pt-pb)*(1-f);return`<line x1="${pl}" x2="${W-6}" y1="${yy}" y2="${yy}" stroke="#dbe5f1"/><text x="${pl-6}" y="${yy+3}" font-size="10" text-anchor="end" fill="#5a6c82">${v>=1e6?(v/1e6).toFixed(1)+' M':v>=1e3?Math.round(v/1e3)+' mil':Math.round(v)}</text>`}).join('');
+  const bars=labels.map((l,i)=>series.map((sr,k)=>{const x=pl+gw*i+gw/2-bw*series.length/2+k*bw,yy=y(sr[i]);return`<rect x="${x}" y="${yy}" width="${bw-3}" height="${H-pb-yy}" rx="3" fill="${cols[k]}"><title>${names[k]} ${l}: ${fmt(sr[i])}</title></rect>`}).join('')+`<text x="${pl+gw*i+gw/2}" y="${H-10}" font-size="11" text-anchor="middle" fill="#2c3e57">${l}</text>`).join('');
+  return `<svg viewBox="0 0 ${W} ${H}" style="width:100%;max-width:${W}px">${grid}${bars}</svg><div class="emp">${names.map((x,k)=>`<span style="display:inline-block;width:10px;height:10px;background:${cols[k]};border-radius:2px;margin:0 4px 0 10px"></span>${x}`).join('')}</div>`}
+function chartH(items,col){const mx=Math.max(1,...items.map(x=>Math.abs(x[1])));return items.length?`<div>${items.map(x=>`<div style="display:flex;align-items:center;gap:8px;margin:5px 0;font-size:12.5px"><span style="width:190px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${esc(x[0])}">${esc(x[0])}</span><div style="flex:1;background:#eef3fa;border-radius:6px"><div style="width:${Math.max(2,Math.abs(x[1])/mx*100)}%;background:${col};height:16px;border-radius:6px"></div></div><b style="width:110px;text-align:right">${fmt(x[1])}</b></div>`).join('')}</div>`:'<p class="emp">Aún no hay datos para este gráfico.</p>'}
+function vGraficos(){const {J,st}=D(),Jn=Jnc(J);if(!Jn.length)return `<div class="note">Los gráficos se llenan solos a medida que registras documentos. Empieza con el saldo inicial y tus primeras facturas.</div>`;
+  const ms=[...new Set(Jn.map(x=>x.fecha.slice(0,7)))].sort(),sm=(f,m)=>Jn.filter(x=>x.fecha.slice(0,7)===m&&f(x)).reduce((a,x)=>a+x.ha-x.de,0),ing=ms.map(m=>sm(x=>x.c[0]==='4',m)),cg=ms.map(m=>-sm(x=>x.c[0]==='5'||x.c[0]==='6',m)),ut=ing.map((v,i)=>v-cg[i]);
+  const gas={};Jn.filter(x=>x.c[0]==='5'||x.c[0]==='6').forEach(x=>gas[x.c]=(gas[x.c]||0)+x.de-x.ha);
+  const gl=Object.keys(gas).filter(c=>gas[c]>0).sort((a,b)=>gas[b]-gas[a]).slice(0,6).map(c=>[c+' '+(PUC[c]||''),gas[c]]);
+  const vc={};S.docs.filter(d=>d.tipo==='FV').forEach(d=>vc[d.ter]=(vc[d.ter]||0)+docCalc(d).base);const cl=Object.keys(vc).sort((a,b)=>vc[b]-vc[a]).slice(0,5).map(t=>[ter(t).nombre,vc[t]]);
+  const k=kpis(J,st,S.productos),bs=[['Caja y bancos',k.caja+k.bancos],['Clientes por cobrar',k.clientes],['Inventario',k.inventario],['Proveedores por pagar',k.proveedores]];
+  const lab=ms.map(m=>MESES[+m.slice(5,7)-1]+' '+m.slice(2,4));
+  return `<div class="g2" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:14px">
+  <div class="card"><b>Ingresos, costos y gastos por mes</b>${chartV(lab,[ing,cg,ut],['#1b4f8a','#e0a23a','#58b36a'],['Ingresos','Costos y gastos','Utilidad'])}</div>
+  <div class="card"><b>¿En qué se va el dinero? (mayores gastos y costos)</b>${chartH(gl,'#e0a23a')}</div>
+  <div class="card"><b>Clientes que más compran (base de ventas)</b>${chartH(cl,'#1b4f8a')}</div>
+  <div class="card"><b>Lo que tienes y lo que debes</b>${chartH(bs,'#6aa3dc')}<p class="emp">Compara el efectivo y lo que te deben con lo que debes a proveedores.</p></div></div>`}
 function vInicio(){
   const {J,st}=D(),k=kpis(J,st,S.productos),e=S.empresa,Jn=Jnc(J),kn=kpis(Jn,st,S.productos);
   const has=t=>S.docs.some(d=>d.tipo===t);
-  const tb=[['acc','Accesos directos'],['ind','Indicadores'],['rut','Mi ruta paso a paso'],['map','Mapa de procesos']];
+  const tb=[['acc','Accesos directos'],['ind','Indicadores'],['gra','Gráficos'],['rut','Mi ruta paso a paso'],['map','Mapa de procesos']];
   const tabs=`<div class="itabs">${tb.map(x=>`<button class="${inTab===x[0]?'on':''}" onclick="inTab='${x[0]}';render()">${x[1]}</button>`).join('')}</div>`;
   if(inTab==='map')return tabs+flowMap(J);
+  if(inTab==='gra')return tabs+vGraficos();
   if(inTab==='ind'){const kp=[['Ventas',kn.ventas],['Utilidad del período',kn.utilidad],['Bancos',k.bancos],['Caja',k.caja],['Clientes por cobrar',k.clientes],['Proveedores por pagar',k.proveedores],['Inventario',k.inventario],['Activos fijos (neto)',bal(J,'15')],['IVA por pagar',k.ivaPagar]];
     return tabs+`<div class="grid">${kp.map(x=>`<div class="kpi"><span>${x[0]}</span><b>${fmt(x[1])}</b></div>`).join('')}</div>`}
   if(inTab==='rut'){const ruta=[['Configura los datos de tu empresa',!!e.nombre,'config'],['Registra el saldo inicial (comprobante contable)',has('CC'),'CC'],['Crea tus clientes y proveedores',S.terceros.length>0,'clientes'],['Crea tus productos',S.productos.length>0,'inventario'],['Registra las compras de mercancía',has('FC'),'FC'],['Registra las ventas',has('FV'),'FV'],['Registra cobros y pagos',has('RC')&&has('CE'),'RC'],['Registra los gastos del mes',has('GA'),'GA'],['Activos fijos y depreciación',has('AF')&&has('DP'),'AF'],['Crea empleados',S.empleados.length>0,'empleados'],['Liquida y paga la nómina',has('NO')&&has('PN'),'NO'],['Concilia el banco',Object.keys(S.conc||{}).length>0,'conc'],['Declara el IVA',has('DI'),'DI'],['Cierra el ejercicio',has('CI'),'CI']];
